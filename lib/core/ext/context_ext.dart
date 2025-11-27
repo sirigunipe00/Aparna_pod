@@ -37,11 +37,12 @@ extension BuildContextExt on BuildContext {
   String dayOfTimeGreeting() {
     final currHour = DFU.now().hour;
     return switch (currHour) {
-      < 12 => 'Good Morning,',
-      > 12 && <= 16 => 'Good Afternoon,',
-      > 16 && < 20 => 'Good Evening,',
-      >= 20 => 'Good Night,',
-      _ => '',
+      >= 0 && < 12 => 'Good Morning,',
+      >= 12 && < 17 => 'Good Afternoon,',
+      >= 17 && < 20 => 'Good Evening,',
+      _ => 'Good Night,',
     };
   }
 }
+
+

@@ -70,6 +70,9 @@ import 'dart:isolate';
 import 'package:aparna_pod/core/consts/urls.dart';
 import 'package:aparna_pod/core/di/injector.dart';
 import 'package:aparna_pod/core/logger/app_logger.dart';
+import 'package:aparna_pod/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -79,16 +82,17 @@ Future<void> bootstrap(void Function() runApp) async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
+  
   ]);
 
   await _initInjector();
 
   if (kDebugMode) {
-    await register<Urls>(Urls.local(), instanceName: 'baseUrl');
+    await register<Urls>(Urls.aparnaUAT(), instanceName: 'baseUrl');
   } else {
-    await register<Urls>(Urls.local(), instanceName: 'baseUrl');
+    await register<Urls>(Urls.aparnaUAT(), instanceName: 'baseUrl');
   }
+   await _initFirebase();
 
   _setupErrorHandling(runApp);
 }
@@ -96,7 +100,14 @@ Future<void> bootstrap(void Function() runApp) async {
 Future<void> _initInjector() async {
   await configureDependencies(env: Environment.prod);
 }
+Future<void> _initFirebase() async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.android);
+  if (kDebugMode) {
+    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
+  }
 
+
+}
 void _setupErrorHandling(void Function() runApp) {
   // Handle uncaught errors in isolates
   Isolate.current.addErrorListener(

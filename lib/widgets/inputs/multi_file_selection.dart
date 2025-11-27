@@ -46,12 +46,14 @@ class MultiFileSelectionWidget extends StatefulWidget {
 
 class _MultiFileSelectionWidgetState extends State<MultiFileSelectionWidget>
     with AttahcmentSelectionMixin {
-  final _selectedImages = <File>[];
+  var _selectedImages = <File>[];
 
   @override
   void initState() {
     super.initState();
-    _selectedImages..addAll(widget.initialFiles)..toSet()..toList();
+    // _selectedImages..addAll(widget.initialFiles)..toSet()..toList();
+    _selectedImages = widget.initialFiles.toSet().toList();
+
   }
   @override
   Widget build(BuildContext context) {
@@ -150,7 +152,9 @@ class _MultiFileSelectionWidgetState extends State<MultiFileSelectionWidget>
   }
 
   Future<void> _capture() async {
-    final index = [..._selectedImages, ...{widget.initialValue}].length;
+    // final index = [..._selectedImages, ...{widget.initialValue}].length;
+    final index = _selectedImages.length + widget.initialValue.length;
+
     final capturedFile = await captureImage();
     if (capturedFile != null) {
       final directoryPath = capturedFile.parent.path;
@@ -225,11 +229,14 @@ class __InvoiceImagesListViewState extends State<_InvoiceImagesListView> {
               onTap: () {
                 context
                   ..exit()
-                  ..goToPage(ImagePreviewPage(
-                    image: image is File ? image : null,
-                    imageUrl: image is String ? image : null,
-                    title: imageName,
-                  ));
+                ..goToPage(
+  ImagePreviewPage(
+    title: imageName,
+    images: widget.files,      // show all images
+    initialIndex: widget.files.indexOf(image),
+  ),
+);
+
               },
               contentPadding: const EdgeInsets.only(left: 8.0),
               leading: SizedBox(

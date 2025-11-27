@@ -1,4 +1,3 @@
-import 'package:aparna_pod/app/widgets/statusmenu_widget.dart';
 import 'package:aparna_pod/core/core.dart';
 import 'package:aparna_pod/core/model/page_view_filters_cubit.dart';
 import 'package:aparna_pod/styles/app_colors.dart';
@@ -10,7 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 enum PageMode2 {
-  gateentry('Gate Entry'),
+  gateentry('Proof Of Delivery'),
   gateexit('Gate Exit'),
   incidentregister('Incident Register'),
   inviteVisitor('Invite Visitor'),
@@ -41,7 +40,7 @@ class AppPageView2<T extends PageViewFiltersCubit> extends StatelessWidget {
   final String scaffoldBg;
 
   String get hintText => switch (mode) {
-    PageMode2.gateentry => 'Search Gate-Entry ID',
+    PageMode2.gateentry => 'Search POD',
     PageMode2.gateexit => 'Search Gate-Exit ID',
     PageMode2.incidentregister => 'Search Incident Register ID',
     PageMode2.inviteVisitor => 'Search Invite Visitor ID',
@@ -111,16 +110,16 @@ class AppPageView2<T extends PageViewFiltersCubit> extends StatelessWidget {
                       onSearch: context.cubit<T>().onSearch,
                     ),
                   ),
-                  AppSpacer.p8(),
-                  Expanded(
-                    flex: 1,
-                    child: StatusMenuWidget(
-                      defaultSel: context.read<T>().state.status,
-                      items: mode == PageMode2.createVisit ?  ['Draft','Submitted','Pending', 'Approved', 'Rejected'] :
-                      const ['Draft', 'Submitted'],
-                      onChange: context.cubit<T>().onChangeStatus,
-                    ),
-                  )
+                  // AppSpacer.p8(),
+                  // Expanded(
+                  //   flex: 1,
+                  //   child: StatusMenuWidget(
+                  //     defaultSel: context.read<T>().state.status,
+                  //     items: mode == PageMode2.createVisit ?  ['Draft','Submitted','Pending', 'Approved', 'Rejected'] :
+                  //     const ['Draft', 'Submitted'],
+                  //     onChange: context.cubit<T>().onChangeStatus,
+                  //   ),
+                  // )
                 ],
               ),
             ),

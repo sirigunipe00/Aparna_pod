@@ -13,7 +13,7 @@ class AppMaterialTheme {
         fontFamily: 'Quicksand',
         textTheme: GoogleFonts.quicksandTextTheme(),
         colorScheme: scheme,
-        cardTheme: CardTheme(
+        cardTheme: CardThemeData(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.0),
             side: const BorderSide(),

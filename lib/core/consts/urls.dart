@@ -4,8 +4,8 @@ final _reqisteredUrl = $sl.get<Urls>(instanceName: 'baseUrl');
 
 class Urls {
   factory Urls.aparnaUAT() =>
-      const Urls('https://aparnagmuat.easycloud.co.in/api');
-      factory Urls.local() => const Urls('http://192.168.0.151:8000/api');
+      const Urls('http://192.168.3.64/api');
+      factory Urls.local() => const Urls('http://192.168.0.134:8000/api');
   factory Urls.aparnaLive() => const Urls('https://aparnagmlive.easycloud.co.in/api');
 
   const Urls(this.url);
@@ -27,7 +27,8 @@ class Urls {
   static final appUpdate ='$cusWs/easy_common.api.get_app_version';
 
   static final login = '$cusWs/login';
-  static final getUsers = '$cusWs/aparna_pod.api.get_user';
+  static final getUsers = '$cusWs/aparna_pod.auth.user_login.custom_login';
+  static final podUpload = '$cusWs/aparna_pod.api.pod_invoice.upload_pod_invoice';
   static final getList = '$cusWs/frappe.client.get_list';
   static final getOutwardList = '$cusWs/frappe.client';
   static final createGateEntry = '$cusWs/aparna_pod.api.create_gate_entry';

@@ -2,7 +2,6 @@ import 'package:aparna_pod/core/ext/context_ext.dart';
 import 'package:aparna_pod/core/utils/string_utils.dart';
 import 'package:aparna_pod/styles/app_colors.dart';
 import 'package:aparna_pod/styles/app_text_styles.dart';
-import 'package:aparna_pod/widgets/app_spacer.dart';
 import 'package:aparna_pod/widgets/doc_status_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -43,11 +42,11 @@ class TitleStatusAppBar extends StatelessWidget implements PreferredSizeWidget {
                       style: AppTextStyles.titleLarge(context)
                           .copyWith(color: AppColors.black)),
                 ],
-                if (alignment == DocNoAlignment.horizontal) ...[
-                  AppSpacer.p8(),
-                  Text('($docNo)',
-                      style: AppTextStyles.titleMedium(context, textColor)),
-                ]
+                // if (alignment == DocNoAlignment.horizontal) ...[
+                //   AppSpacer.p8(),
+                //   Text('($docNo)',
+                //       style: AppTextStyles.titleMedium(context, textColor)),
+                // ]
               ],
             ),
             if(alignment == DocNoAlignment.vertical)...[

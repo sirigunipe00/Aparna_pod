@@ -75,23 +75,19 @@ class _AuthenticationScrnState extends State<AuthenticationScrn> {
                   title: 'Password',
                   controller: pswd,
                   obscureText: showPswd,
-                  suffixIcon: InkWell(
-                    onTap: togglePswd,
-                    child: Text(
-                      showPswd ? ' show ' : ' hide ',
-                      style: context.textTheme.titleMedium?.copyWith(
-                        color: Colors.transparent,
-                        shadows: [
-                          const Shadow(color: AppColors.haintBlue, offset: Offset(0, -5)),
-                        ],
-                        decorationColor: AppColors.haintBlue,
-                        decoration: TextDecoration.underline,
-                        height: 1.5,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1,
+                 suffixIcon: InkWell(
+                        onTap: togglePswd,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Icon(
+                            showPswd
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                            color: Colors.grey.shade600,
+                            size: 20,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
                 ),
                 
                 BlocConsumer<SignInCubit, SignInState>(
@@ -110,6 +106,7 @@ class _AuthenticationScrnState extends State<AuthenticationScrn> {
                   builder: (_, state) {
                     return AppButton(
                       label: 'Sign In',
+                      bgColor: const Color(0xFF0072bc),
                       isLoading: state.isLoading,
                       margin: const EdgeInsets.all(12),
                       onPressed: () => context

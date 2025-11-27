@@ -22,22 +22,32 @@ class NewGateEntry extends StatefulWidget {
 class _NewGateEntryState extends State<NewGateEntry> {
   @override
   Widget build(BuildContext context) {
-    final gateEntryState = context.read<CreateGateEntryCubit>().state;
+    final gateEntryState = context.watch<CreateGateEntryCubit>().state;
     final newform = gateEntryState.form;
     final status = newform.docStatus;
-    final name = newform.name;
+    // final name = newform.name;
+    final isNew = gateEntryState.isNew;
 
-    final isNew = gateEntryState.view == GateEntryView.create;
+    // final isNew = gateEntryState.view == GateEntryView.create;
     return Scaffold(
       backgroundColor: AppColors.white,
+      // appBar: isNew
+      //     ? const SimpleAppBar(title: 'Proof Of Delivery')
+      //     : TitleStatusAppBar(
+      //         title: ' of Delivery',
+      //          docNo: name.valueOrEmpty,
+      //         status: StringUtils.docStatus(status ?? 0),
+      //         textColor: AppColors.marigoldDDust,
+      //       )
+      // as PreferredSizeWidget,
       appBar: isNew
-          ? const SimpleAppBar(title: 'New Gate Entry')
-          : TitleStatusAppBar(
-              title: 'Gate Entry',
-              docNo: name.valueOrEmpty,
-              status: StringUtils.docStatus(status ?? 0),
-              textColor: AppColors.marigoldDDust,
-            ) as PreferredSizeWidget,
+    ? const SimpleAppBar(title: 'Proof Of Delivery')
+    : const TitleStatusAppBar(
+        title: 'Proof of Delivery',
+        docNo: '',
+        status: 'Submitted', textColor: AppColors.marigoldDDust,
+      ),
+
       body: BlocListener<CreateGateEntryCubit, CreateGateEntryState>(
         listener: (_, state) async {
           if (state.isSuccess && state.successMsg!.isNotNull) {
@@ -48,15 +58,16 @@ class _NewGateEntryState extends State<NewGateEntry> {
               onTapDismiss: context.exit,
             ).then(
               (_) {
-                 final docName = state.form.name;
+                //  final docName = state.form.name;
                 if (!context.mounted) return;
                 context.cubit<CreateGateEntryCubit>().errorHandled();
-                context.cubit<GateEntryLinesCubit>().request(docName);
+
                   final gateEntryFilters =
                 context.read<GateEntryFilterCubit>().state;
                 context
                     .cubit<GateEntriesCubit>()
                     .fetchInitial(Pair(StringUtils.docStatusInt(gateEntryFilters.status), gateEntryFilters.query));
+                         Navigator.pop(context, true);
                 setState(() {});
               },
             );

@@ -2,7 +2,6 @@ import 'package:aparna_pod/core/ext/context_ext.dart';
 import 'package:aparna_pod/styles/app_colors.dart';
 import 'package:aparna_pod/styles/app_text_styles.dart';
 import 'package:aparna_pod/styles/icons.dart';
-import 'package:aparna_pod/widgets/spaced_column.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -37,7 +36,7 @@ class AppPageView extends StatelessWidget {
           top: kToolbarHeight + 112,
           child: Container(
             width: context.sizeOfWidth,
-            padding: const EdgeInsets.all(8.0).copyWith(top: 100),
+            padding: const EdgeInsets.all(8.0).copyWith(top: 10),
             decoration: BoxDecoration(
               color: AppColors.pageViewColor,
               borderRadius: const BorderRadius.only(
@@ -83,19 +82,19 @@ class _HomeCardContent extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Flexible(
-          flex: 2,
-          child: SpacedColumn(
-            margin: const EdgeInsets.all(8.0),
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(context.dayOfTimeGreeting(), 
-                style: AppTextStyles.titleLarge(context).copyWith(fontSize: 20)),
-              Text('Ready to capture some entries & exits?', 
-                style: AppTextStyles.titleMediumWhite(context).copyWith(fontSize: 14)),
-            ],
-          ),
-        ),
+        // Flexible(
+        //   flex: 2,
+        //   child: SpacedColumn(
+        //     margin: const EdgeInsets.all(8.0),
+        //     crossAxisAlignment: CrossAxisAlignment.start,
+        //     children: [
+        //       // Text(context.dayOfTimeGreeting(), 
+        //         // style: AppTextStyles.titleLarge(context).copyWith(fontSize: 20)),
+        //       // Text('Ready to capture some entries & exits?', 
+        //       //   style: AppTextStyles.titleMediumWhite(context).copyWith(fontSize: 14)),
+        //     ],
+        //   ),
+        // ),
         SvgPicture.asset(AppIcons.helloCuate.path, alignment: Alignment.topRight),
       ],
     );
@@ -110,19 +109,19 @@ class _SettingsCardContent extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Flexible(
-          flex: 2,
-          child: SpacedColumn(
-            margin: const EdgeInsets.all(8.0),
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Welcome,', 
-                style: AppTextStyles.titleLarge(context).copyWith(fontSize: 20)),
-              Text('Your security and convenience, prioritized.', 
-                style: AppTextStyles.titleMediumWhite(context).copyWith(fontSize: 14)),
-            ],
-          ),
-        ),
+        // Flexible(
+        //   flex: 2,
+        //   child: SpacedColumn(
+        //     margin: const EdgeInsets.all(8.0),
+        //     crossAxisAlignment: CrossAxisAlignment.start,
+        //     children: [
+        //       Text('Welcome,', 
+        //         style: AppTextStyles.titleLarge(context).copyWith(fontSize: 20)),
+        //       Text('Your security and convenience, prioritized.', 
+        //         style: AppTextStyles.titleMediumWhite(context).copyWith(fontSize: 14)),
+        //     ],
+        //   ),
+        // ),
         SvgPicture.asset(AppIcons.settingsCuate.path, alignment: Alignment.topRight),
       ],
     );

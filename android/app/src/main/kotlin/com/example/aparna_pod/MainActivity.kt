@@ -1,4 +1,4 @@
-package com.example.aparna_pod
+package `in`.easycloud.aparna_pod
 
 import io.flutter.embedding.android.FlutterActivity
 

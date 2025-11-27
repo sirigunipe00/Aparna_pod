@@ -16,12 +16,12 @@ final _privateConstructorUsedError = UnsupportedError(
 
 /// @nodoc
 mixin _$CreateGateEntryState {
-  GateEntryForm get form => throw _privateConstructorUsedError;
+  PodUploadForm get form => throw _privateConstructorUsedError;
   bool get isLoading => throw _privateConstructorUsedError;
   bool get isSuccess => throw _privateConstructorUsedError;
   GateEntryView get view => throw _privateConstructorUsedError;
-  List<GateEntryLinesForm> get lines => throw _privateConstructorUsedError;
   String? get successMsg => throw _privateConstructorUsedError;
+  bool get isNew => throw _privateConstructorUsedError;
   Failure? get error => throw _privateConstructorUsedError;
 
   /// Create a copy of CreateGateEntryState
@@ -38,15 +38,15 @@ abstract class $CreateGateEntryStateCopyWith<$Res> {
       _$CreateGateEntryStateCopyWithImpl<$Res, CreateGateEntryState>;
   @useResult
   $Res call(
-      {GateEntryForm form,
+      {PodUploadForm form,
       bool isLoading,
       bool isSuccess,
       GateEntryView view,
-      List<GateEntryLinesForm> lines,
       String? successMsg,
+      bool isNew,
       Failure? error});
 
-  $GateEntryFormCopyWith<$Res> get form;
+  $PodUploadFormCopyWith<$Res> get form;
   $FailureCopyWith<$Res>? get error;
 }
 
@@ -70,15 +70,15 @@ class _$CreateGateEntryStateCopyWithImpl<$Res,
     Object? isLoading = null,
     Object? isSuccess = null,
     Object? view = null,
-    Object? lines = null,
     Object? successMsg = freezed,
+    Object? isNew = null,
     Object? error = freezed,
   }) {
     return _then(_value.copyWith(
       form: null == form
           ? _value.form
           : form // ignore: cast_nullable_to_non_nullable
-              as GateEntryForm,
+              as PodUploadForm,
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
@@ -91,14 +91,14 @@ class _$CreateGateEntryStateCopyWithImpl<$Res,
           ? _value.view
           : view // ignore: cast_nullable_to_non_nullable
               as GateEntryView,
-      lines: null == lines
-          ? _value.lines
-          : lines // ignore: cast_nullable_to_non_nullable
-              as List<GateEntryLinesForm>,
       successMsg: freezed == successMsg
           ? _value.successMsg
           : successMsg // ignore: cast_nullable_to_non_nullable
               as String?,
+      isNew: null == isNew
+          ? _value.isNew
+          : isNew // ignore: cast_nullable_to_non_nullable
+              as bool,
       error: freezed == error
           ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
@@ -110,8 +110,8 @@ class _$CreateGateEntryStateCopyWithImpl<$Res,
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $GateEntryFormCopyWith<$Res> get form {
-    return $GateEntryFormCopyWith<$Res>(_value.form, (value) {
+  $PodUploadFormCopyWith<$Res> get form {
+    return $PodUploadFormCopyWith<$Res>(_value.form, (value) {
       return _then(_value.copyWith(form: value) as $Val);
     });
   }
@@ -140,16 +140,16 @@ abstract class _$$CreateGateEntryStateImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {GateEntryForm form,
+      {PodUploadForm form,
       bool isLoading,
       bool isSuccess,
       GateEntryView view,
-      List<GateEntryLinesForm> lines,
       String? successMsg,
+      bool isNew,
       Failure? error});
 
   @override
-  $GateEntryFormCopyWith<$Res> get form;
+  $PodUploadFormCopyWith<$Res> get form;
   @override
   $FailureCopyWith<$Res>? get error;
 }
@@ -171,15 +171,15 @@ class __$$CreateGateEntryStateImplCopyWithImpl<$Res>
     Object? isLoading = null,
     Object? isSuccess = null,
     Object? view = null,
-    Object? lines = null,
     Object? successMsg = freezed,
+    Object? isNew = null,
     Object? error = freezed,
   }) {
     return _then(_$CreateGateEntryStateImpl(
       form: null == form
           ? _value.form
           : form // ignore: cast_nullable_to_non_nullable
-              as GateEntryForm,
+              as PodUploadForm,
       isLoading: null == isLoading
           ? _value.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
@@ -192,14 +192,14 @@ class __$$CreateGateEntryStateImplCopyWithImpl<$Res>
           ? _value.view
           : view // ignore: cast_nullable_to_non_nullable
               as GateEntryView,
-      lines: null == lines
-          ? _value._lines
-          : lines // ignore: cast_nullable_to_non_nullable
-              as List<GateEntryLinesForm>,
       successMsg: freezed == successMsg
           ? _value.successMsg
           : successMsg // ignore: cast_nullable_to_non_nullable
               as String?,
+      isNew: null == isNew
+          ? _value.isNew
+          : isNew // ignore: cast_nullable_to_non_nullable
+              as bool,
       error: freezed == error
           ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
@@ -216,35 +216,29 @@ class _$CreateGateEntryStateImpl implements _CreateGateEntryState {
       required this.isLoading,
       required this.isSuccess,
       required this.view,
-      required final List<GateEntryLinesForm> lines,
       this.successMsg,
-      this.error})
-      : _lines = lines;
+      this.isNew = true,
+      this.error});
 
   @override
-  final GateEntryForm form;
+  final PodUploadForm form;
   @override
   final bool isLoading;
   @override
   final bool isSuccess;
   @override
   final GateEntryView view;
-  final List<GateEntryLinesForm> _lines;
-  @override
-  List<GateEntryLinesForm> get lines {
-    if (_lines is EqualUnmodifiableListView) return _lines;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_lines);
-  }
-
   @override
   final String? successMsg;
+  @override
+  @JsonKey()
+  final bool isNew;
   @override
   final Failure? error;
 
   @override
   String toString() {
-    return 'CreateGateEntryState(form: $form, isLoading: $isLoading, isSuccess: $isSuccess, view: $view, lines: $lines, successMsg: $successMsg, error: $error)';
+    return 'CreateGateEntryState(form: $form, isLoading: $isLoading, isSuccess: $isSuccess, view: $view, successMsg: $successMsg, isNew: $isNew, error: $error)';
   }
 
   @override
@@ -258,15 +252,15 @@ class _$CreateGateEntryStateImpl implements _CreateGateEntryState {
             (identical(other.isSuccess, isSuccess) ||
                 other.isSuccess == isSuccess) &&
             (identical(other.view, view) || other.view == view) &&
-            const DeepCollectionEquality().equals(other._lines, _lines) &&
             (identical(other.successMsg, successMsg) ||
                 other.successMsg == successMsg) &&
+            (identical(other.isNew, isNew) || other.isNew == isNew) &&
             (identical(other.error, error) || other.error == error));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, form, isLoading, isSuccess, view,
-      const DeepCollectionEquality().hash(_lines), successMsg, error);
+  int get hashCode => Object.hash(
+      runtimeType, form, isLoading, isSuccess, view, successMsg, isNew, error);
 
   /// Create a copy of CreateGateEntryState
   /// with the given fields replaced by the non-null parameter values.
@@ -281,16 +275,16 @@ class _$CreateGateEntryStateImpl implements _CreateGateEntryState {
 
 abstract class _CreateGateEntryState implements CreateGateEntryState {
   const factory _CreateGateEntryState(
-      {required final GateEntryForm form,
+      {required final PodUploadForm form,
       required final bool isLoading,
       required final bool isSuccess,
       required final GateEntryView view,
-      required final List<GateEntryLinesForm> lines,
       final String? successMsg,
+      final bool isNew,
       final Failure? error}) = _$CreateGateEntryStateImpl;
 
   @override
-  GateEntryForm get form;
+  PodUploadForm get form;
   @override
   bool get isLoading;
   @override
@@ -298,9 +292,9 @@ abstract class _CreateGateEntryState implements CreateGateEntryState {
   @override
   GateEntryView get view;
   @override
-  List<GateEntryLinesForm> get lines;
-  @override
   String? get successMsg;
+  @override
+  bool get isNew;
   @override
   Failure? get error;
 

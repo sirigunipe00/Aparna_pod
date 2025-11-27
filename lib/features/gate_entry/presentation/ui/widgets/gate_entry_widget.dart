@@ -1,10 +1,9 @@
 import 'package:aparna_pod/core/core.dart';
-import 'package:aparna_pod/features/gate_entry/model/gate_entry_form.dart';
+import 'package:aparna_pod/features/gate_entry/model/pod_upload_form.dart';
 import 'package:aparna_pod/styles/app_colors.dart';
 import 'package:aparna_pod/styles/app_text_styles.dart';
 import 'package:aparna_pod/widgets/app_spacer.dart';
 import 'package:aparna_pod/widgets/buttons/app_view_btn.dart';
-import 'package:aparna_pod/widgets/doc_status_widget.dart';
 import 'package:aparna_pod/widgets/spaced_column.dart';
 import 'package:flutter/material.dart';
 
@@ -15,7 +14,7 @@ class GateEntryWidget extends StatelessWidget {
     required this.onTap,
   });
 
-  final GateEntryForm gateEntry;
+  final PodUploadForm gateEntry;
   final VoidCallback onTap;
 
   @override
@@ -35,10 +34,11 @@ class GateEntryWidget extends StatelessWidget {
             children: [
               Row( mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(gateEntry.name!,
+                  Text(gateEntry.sapNo!,
                       style: AppTextStyles.titleLarge(context)
                           .copyWith(color: AppColors.black)),
-                  Text(DFU.ddMMyyyyFromStr(gateEntry.creationDate!),
+                  Text(DFU.ddMMyyyyFromStr(gateEntry.creation ?? ''),
+                  
                       style: AppTextStyles.titleLarge(context)
                           .copyWith(color: AppColors.black)),
                 ],
@@ -48,12 +48,27 @@ class GateEntryWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   ViewBtn(onPressed: onTap),
-                  DocStatusWidget(
-                      status: StringUtils.docStatus(gateEntry.docStatus!))
+                  Text(
+  getFormType(gateEntry),
+  style: AppTextStyles.titleLarge(context)
+      .copyWith(color: AppColors.black),
+),
+
+                  // DocStatusWidget(
+                  //     status: StringUtils.docStatus(gateEntry.!))
                 ],
               ),
             ],
           )),
     );
   }
+  String getFormType(PodUploadForm form) {
+  // Example logic — customize based on your real data
+  if (form.deliveryChallanNo?.startsWith("8") ?? false) {
+    return "Delivery Challan";
+  } else {
+    return "Invoice";
+  }
+}
+
 }

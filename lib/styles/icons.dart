@@ -9,11 +9,11 @@ class AppIcons {
   static const info = AppIcon('$iconsPath/info.png');
   static const confirm = AppIcon('$iconsPath/confirm.png');
 
-  static const aparnaLogo = AppIcon('$basePath/logo/aparna_pod.png');
-  static const vechileEntry = AppIcon('$basePath/logo/vehicle_entry.png');
+  static const aparnaLogo = AppIcon('$basePath/logo/aparna.png');
+  static const vechileEntry = AppIcon('$basePath/icon/vehicle_entry.png');
   static const vehcileExit = AppIcon('$basePath/logo/vehicle_exit.png');
   static const helloCuate = AppIcon('$basePath/logo/hello_cuate.svg');
-  static const bgFrame1 = AppIcon('$basePath/logo/bg_frame_1.png');
+  static const bgFrame1 = AppIcon('$basePath/icon/bg_frame_1.png');
   static const bgFrame2 = AppIcon('$basePath/logo/bg_frame_2.png');
   static const bgFrame3 = AppIcon('$basePath/logo/incident_curves.png');
   static const bgFrame4 = AppIcon('$basePath/logo/invite_visitor.png');

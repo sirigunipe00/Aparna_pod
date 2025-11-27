@@ -11,18 +11,20 @@ class AppErrorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text('OOPS', 
-          style: AppTextStyles.errorStyle(context).copyWith(fontSize: 20),
-        ),
-        AppSpacer.p8(),
-        Text(error, textAlign: TextAlign.center, style: AppTextStyles.errorStyle(context)),
-        AppSpacer.p8(),
-        _RetryBtn(onRefresh: onRefresh)
-      ],
+    return Center(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('OOPS', 
+            style: AppTextStyles.errorStyle(context).copyWith(fontSize: 20),
+          ),
+          AppSpacer.p8(),
+          Text(error, textAlign: TextAlign.center, style: AppTextStyles.errorStyle(context)),
+          AppSpacer.p8(),
+          _RetryBtn(onRefresh: onRefresh)
+        ],
+      ),
     );
   }
 }

@@ -50,19 +50,28 @@ class AppProfilePage extends StatelessWidget {
                   return const SizedBox();
                 },
               ),
-              AppButton(
-                label: 'Logout',
-                margin: const EdgeInsets.all(12.0),
-                icon: Transform.rotate(
-                  angle: 180 * math.pi / 180,
-                  child:
-                      const Icon(Icons.logout_outlined, color: AppColors.white),
+          //  const SizedBox(height: 24),
+            Padding(
+              padding: const EdgeInsets.only(top :60.0),
+              child: AppButton(
+                  label: 'Logout',
+                  margin: const EdgeInsets.all(12.0),
+                  bgColor: const Color(0xFF0072bc),
+                  icon: Transform.rotate(
+                    angle: 180 * math.pi / 180,
+                    child:
+                        const Icon(Icons.logout_outlined, color: AppColors.white),
+                  ),
+                  onPressed: context.cubit<AuthCubit>().signOut,
                 ),
-                onPressed: context.cubit<AuthCubit>().signOut,
-              ),
+            ),
+            
             ],
+            
           ),
+          
         ));
+        
   }
 
   Future<String> _appversion() async {

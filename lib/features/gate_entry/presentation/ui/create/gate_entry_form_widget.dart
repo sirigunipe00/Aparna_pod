@@ -1,25 +1,23 @@
-import 'package:aparna_pod/app/widgets/section_head.dart';
-import 'package:aparna_pod/core/core.dart';
-import 'package:aparna_pod/features/gate_entry/data/static_data.dart';
-import 'package:aparna_pod/features/gate_entry/model/customer_name_form.dart';
-import 'package:aparna_pod/features/gate_entry/presentation/bloc/bloc_provider.dart';
-import 'package:aparna_pod/features/gate_entry/presentation/bloc/create_gate_entry/gate_entry_cubit.dart';
-import 'package:aparna_pod/features/gate_entry/presentation/ui/widgets/entry_lines_widget.dart';
-import 'package:aparna_pod/features/gate_exit/model/receiver_address_form.dart';
-import 'package:aparna_pod/features/gate_exit/model/receiver_name_form.dart';
-import 'package:aparna_pod/features/gate_exit/presentation/bloc/bloc_provider.dart';
-import 'package:aparna_pod/features/incident_register/presentation/bloc/bloc_provider.dart';
-import 'package:aparna_pod/styles/app_colors.dart';
-import 'package:aparna_pod/widgets/inputs/compact_listtile.dart';
-import 'package:aparna_pod/widgets/inputs/photo_selection_widget.dart';
-import 'package:aparna_pod/widgets/inputs/search_dropdown_list.dart';
-import 'package:aparna_pod/widgets/inputs/time_selection_field.dart';
+import 'dart:io';
 
+import 'package:aparna_pod/core/core.dart';
+import 'package:aparna_pod/features/gate_entry/presentation/bloc/create_gate_entry/gate_entry_cubit.dart';
+import 'package:aparna_pod/styles/app_colors.dart';
+import 'package:aparna_pod/widgets/inputs/photo_selection_widget.dart';
 import 'package:aparna_pod/widgets/widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+
+DocumentType detectDocumentType(String text) {
+  final t = text.toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+
+  if (t.contains('delivery challan number') || t.contains('delivery challan')) {
+    return DocumentType.deliveryChallan;
+  }
+
+  return DocumentType.invoice;
+}
 
 class GateEntryFormWidget extends StatefulWidget {
   const GateEntryFormWidget({super.key});
@@ -29,29 +27,37 @@ class GateEntryFormWidget extends StatefulWidget {
 }
 
 class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
+  String? lastCroppedPath;
+
   final ScrollController _scrollController = ScrollController();
+  final invoiceNoController = TextEditingController();
+  final invoiceDateController = TextEditingController();
+  final deliveryChallanController = TextEditingController();
+  final sapNoController = TextEditingController();
+  final plantCodeController = TextEditingController();
+
+  @override
+  void dispose() {
+    invoiceNoController.dispose();
+    invoiceDateController.dispose();
+    deliveryChallanController.dispose();
+    sapNoController.dispose();
+    plantCodeController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   final focusNodes = List.generate(40, (index) => FocusNode());
   @override
   Widget build(BuildContext context) {
-    final formState = context.read<CreateGateEntryCubit>().state;
-    final isCreating = formState.view == GateEntryView.create;
-    final isCompleted = formState.view == GateEntryView.completed;
+    final formState = context.watch<CreateGateEntryCubit>().state;
+    // final isCompleted = formState.view == GateEntryView.completed;
     final newform = formState.form;
+
+    $logger.devLog('form..............$newform');
 
     return MultiBlocListener(
       listeners: [
-        BlocListener<AttachmentsList,AttachmentsListState>(
-          listener:(_, state) {
-            state.maybeWhen(
-              orElse: (){},
-              success: (data) {
-                context.cubit<CreateGateEntryCubit>().addInvUrls(data);
-                setState(() {});
-              },
-            );
-          },
-        ),
         BlocListener<CreateGateEntryCubit, CreateGateEntryState>(
           listenWhen: (previous, current) {
             final prevStatus = previous.error?.status;
@@ -71,14 +77,6 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
             }
           },
         ),
-        BlocListener<GateEntryLinesCubit, GateEntryLinesCubitState>(
-          listener: (_, state) {
-            state.maybeWhen(
-              orElse: () {},
-              success: context.cubit<CreateGateEntryCubit>().addAllLines,
-            );
-          },
-        ),
       ],
       child: SingleChildScrollView(
         controller: _scrollController,
@@ -87,744 +85,355 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
           margin: const EdgeInsets.all(12.0),
           defaultHeight: 8,
           children: [
-            const SectoinHead(title: 'Header Details'),
-            BlocBuilder<CompanyNameList, NetworkRequestState<List<String>>>(
-              builder: (_, state) {
-                final names = state.maybeWhen(
-                  orElse: () => <String>[],
-                  success: (data) => data,
-                );
-                return SearchDropDownList(
-                  color: AppColors.marigoldDDust,
-                  isMandatory: true,
-                  items: names,
-                  key: UniqueKey(),
-                  defaultSelection:
-                      names.where((e) => e == newform.plantName).firstOrNull,
-                  title: 'Plant Name',
-                  hint: 'Select Plant Name',
-                  readOnly: isCompleted,
-                  isloading: state.isLoading,
-                  futureRequest: (p0) async {
-                    final where = names.where((e) => e.containsIgnoreCase(p0));
-                    return where.toList();
-                  },
-                  headerBuilder: (_, item, __) => Text(item),
-                  listItemBuilder: (_, item, __, ___) => CompactListTile(
-                    title: item,
-                  ),
-                  onSelected: (names) {
-                    context
-                        .cubit<CreateGateEntryCubit>()
-                        .onValueChanged(plantName: names);
-                  },
-                  focusNode: focusNodes.elementAt(0),
-                );
-              },
-            ),
-            InputField(
-              title: 'Gate Entry Date',
-              isRequired: true,
-              readOnly: true,
-              initialValue: newform.creationDate,
-              borderColor: AppColors.marigoldDDust,
-              focusNode: focusNodes.elementAt(2),
-              inputType: const TextInputType.numberWithOptions(decimal: true),
-            ),
-            TimeSelectionField(
-              borderColor: AppColors.marigoldDDust,
-              readOnly: isCompleted,
-              initialValue: newform.entryTime?.split('.').firstOrNull,
-              title: 'Gate Enty Time',
-              onTimeSelect: (time) {},
-            ),
-            AppDropDownWidget(
-                hint: 'Select Gate Entry Type',
-                readOnly: isCompleted,
-                color: AppColors.marigoldDDust,
-                title: 'Gate Entry Type',
-                isMandatory: true,
-                defaultSelection: newform.entryType,
-                items: AppStaticData.gateEntryType,
-                focusNode: focusNodes.elementAt(1),
-                onSelected: (entryType) {
-                  context
-                      .cubit<CreateGateEntryCubit>()
-                      .onValueChanged(gateEntryType: entryType);
-                  setState(() {});
-                }),
-            if (newform.entryType == 'Gatepass Returnable') ...[
-              DateSelectionField(
-                firstDate: DFU.now(),
-                lastDate: DFU.now().add(const Duration(days: 60)),
-                onDateSelect: (date) {
-                  final dateString = DateFormat('yyyy-MM-dd').format(date);
-                  context
-                      .cubit<CreateGateEntryCubit>()
-                      .onValueChanged(expectedReturnDate: dateString);
-                },
-                initialValue: newform.expectedReturnDate,
-                suffixIcon: const Icon(Icons.calendar_month_outlined),
-                title: 'Expected Return Date',
-                isRequired:
-                    newform.entryType == 'Gatepass Returnable' ? true : false,
-                readOnly: isCompleted,
-                borderColor: AppColors.marigoldDDust,
-                focusNode: focusNodes.elementAt(31),
-              ),
-            ],
-            const Divider(height: 1),
-            const SectoinHead(title: 'Sender Details'),
-            AppDropDownWidget(
-                color: AppColors.marigoldDDust,
-                hint: 'Select Material Type',
-                defaultSelection: newform.materialType,
-                title: 'Material Type',
-                isMandatory: true,
-                readOnly: isCompleted,
-                focusNode: focusNodes.elementAt(3),
-                items: AppStaticData.materialType,
-                onSelected: (materialType) {
-                  context
-                      .cubit<CreateGateEntryCubit>()
-                      .onValueChanged(materialType: materialType);
-                  setState(() {});
-                }),
-            if (newform.materialType != null) ...[
-              if (newform.materialType == 'Sales Return') ...[
-                BlocBuilder<ReceiverNameList, ReceiverNameListState>(
-                  builder: (_, state) {
-                    final names = state.maybeWhen(
-                      orElse: () => <ReceiverNameForm>[],
-                      success: (data) => data,
-                    );
-                    return SearchDropDownList(
-                      color: AppColors.marigoldDDust,
-                      items: names,
-                      key: UniqueKey(),
-                      defaultSelection: names
-                          .where((e) => e.name == newform.customerName)
-                          .firstOrNull,
-                      title: 'Customer Name',
-                      hint: 'Select Customer Name',
-                      readOnly: isCompleted,
-                      isloading: state.isLoading,
-                      futureRequest: (p0) async {
-                        final where = names
-                            .where((e) => e.custName.containsIgnoreCase(p0));
-                        return where.toList();
-                      },
-                      headerBuilder: (_, item, __) => Text(item.custName),
-                      listItemBuilder: (_, item, __, ___) => CompactListTile(
-                        title: item.custName,
-                      ),
-                      onSelected: (names) {
-                        context.cubit<CreateGateEntryCubit>().onValueChanged(
-                              customerName: names.name,
-                            );
-                        context
-                            .cubit<ReceiverAddressList>()
-                            .request(names.name);
-                        setState(() {});
-                      },
-                      focusNode: focusNodes.elementAt(32),
-                    );
-                  },
-                ),
-                BlocConsumer<ReceiverAddressList, ReceiverAddressListState>(
-                  listener: (_, state) {
-                    final address = state.maybeWhen(
-                      orElse: () => <ReceiverAddressForm>[],
-                      success: (data) => data,
-                    );
-                    context.cubit<CreateGateEntryCubit>().onValueChanged(
-                          customerAddress: '${address.firstOrNull?.parent}',
-                        );
-                    setState(() {});
-                  },
-                  builder: (_, state) {
-                    final address = state.maybeWhen(
-                      orElse: () => <ReceiverAddressForm>[],
-                      success: (data) => data,
-                    );
-                    return SearchDropDownList(
-                      color: AppColors.marigoldDDust,
-                      items: address,
-                      key: UniqueKey(),
-                      defaultSelection: address
-                          .where((e) => e.parent == newform.customerAddress)
-                          .firstOrNull,
-                      title: 'Customer Address',
-                      hint: 'Select Customer Address',
-                      readOnly: isCompleted,
-                      isloading: state.isLoading,
-                      futureRequest: (p0) async {
-                        final where = address.where((e) {
-                          final strList = [e.line1, e.line2, e.pincode, e.city]
-                              .nonNulls
-                              .toList();
-                          return strList
-                              .caseInsensitiveSearch(p0, (str) => str)
-                              .isNotEmpty;
-                        });
-                        return where.toList();
-                      },
-                      headerBuilder: (_, item, __) => Text('${item.parent}'),
-                      listItemBuilder: (_, e, __, ___) => CompactListTile(
-                        title: '${e.parent}',
-                        subtitle: [e.line1, e.line2, e.pincode, e.city]
-                            .nonNulls
-                            .join(', '),
-                      ),
-                      onSelected: (address) {
-                        context.cubit<CreateGateEntryCubit>().onValueChanged(
-                            customerAddress: '${address.parent}');
-                      },
-                      focusNode: focusNodes.elementAt(33),
-                    );
-                  },
-                ),
-              ] else ...[
-                BlocBuilder<SupplierNameList, SupplierNameListState>(
-                  builder: (_, state) {
-                    final names = state.maybeWhen(
-                      orElse: () => <SupplierNameForm>[],
-                      success: (data) => data,
-                    );
-                    return SearchDropDownList(
-                      color: AppColors.marigoldDDust,
-                      items: names,
-                      key: UniqueKey(),
-                      defaultSelection: names
-                          .where((e) => e.name == newform.supplierName)
-                          .firstOrNull,
-                      title: 'Supplier Name',
-                      hint: 'Select Supplier Name',
-                      readOnly: isCompleted,
-                      isloading: state.isLoading,
-                      futureRequest: (p0) async {
-                        final where = names.where((e) =>
-                            e.name.containsIgnoreCase(p0) ||
-                            e.supName.containsIgnoreCase(p0));
-                        return where.toList();
-                      },
-                      headerBuilder: (_, item, __) => Text(item.supName),
-                      listItemBuilder: (_, item, __, ___) => CompactListTile(
-                        title: item.supName,
-                      ),
-                      onSelected: (names) {
-                        context
-                            .cubit<CreateGateEntryCubit>()
-                            .onValueChanged(supplierName: names.name);
+            BlocBuilder<CreateGateEntryCubit, CreateGateEntryState>(
+              buildWhen: (previous, current) =>
+                  previous.form.invoiceFiles != current.form.invoiceFiles ||
+                  previous.isNew != current.isNew,
+              builder: (context, state) {
+                final files = state.form.invoiceFiles;
+                final hasFiles = files.isNotNull && files!.isNotEmpty;
+                final shouldShow = state.isNew || hasFiles;
 
-                        context
-                            .cubit<ReceiverAddressList>()
-                            .request(names.name);
-                      },
-                      focusNode: focusNodes.elementAt(4),
-                    );
+                if (!shouldShow) return const SizedBox.shrink();
+
+                return PhotoSelectionWidget(
+                  borderColor: AppColors.marigoldDDust,
+                  fileName: 'Invoice_Photo',
+                  defaultValue: files,
+                  title: 'Invoice Photos',
+                  isReadOnly: !state.isNew,
+                  // onReCrop: (oldFile, newFile) async {
+                  //   final updatedList = [...?state.form.invoiceFiles];
+                  //   updatedList.remove(oldFile);
+
+                  //   final updatedFile = File(newFile.path);
+                  //   updatedList.add(updatedFile);
+
+                  //   lastCroppedPath = updatedFile.path;
+
+                  //   await extractTextFromImage(updatedFile.path);
+
+                  //   context
+                  //       .cubit<CreateGateEntryCubit>()
+                  //       .onValueChanged(invoiceFiles: updatedList);
+                  // },
+                  // onFileCapture: (capturedFiles) {
+                  //   if (!state.isNew) return;
+                  //   context
+                  //       .cubit<CreateGateEntryCubit>()
+                  //       .onValueChanged(invoiceFiles: capturedFiles);
+                  //   for (final f in capturedFiles) {
+                  //     extractTextFromImage(f.path);
+                  //   }
+                  // },
+                  onFileCapture: (capturedFiles) {
+                    if (!state.isNew) return;
+
+                    final cubit = context.cubit<CreateGateEntryCubit>();
+                    final updatedList = List<File>.from(capturedFiles);
+
+                    cubit.onValueChanged(invoiceFiles: updatedList);
+
+                    if (updatedList.isEmpty) {
+                      cubit.onValueChanged(
+                        invoiceNo: null,
+                        sapNo: null,
+                        invoiceDate: null,
+                        deliveryChallanNo: null,
+                        plantCode: null,
+                      );
+
+                      invoiceNoController.clear();
+                      sapNoController.clear();
+                      invoiceDateController.clear();
+                      deliveryChallanController.clear();
+                      plantCodeController.clear();
+
+                      debugPrint('🗑️ Images removed. Form data cleared.');
+                    } else {
+                      for (final f in updatedList) {
+                        extractTextFromImage(f.path);
+                      }
+                    }
                   },
-                ),
-                BlocConsumer<ReceiverAddressList, ReceiverAddressListState>(
-                  listener: (_, state) {
-                    final address = state.maybeWhen(
-                      orElse: () => <ReceiverAddressForm>[],
-                      success: (data) => data,
-                    );
-                    context.cubit<CreateGateEntryCubit>().onValueChanged(
-                          supplierAddress: address.firstOrNull?.parent,
-                        );
-                    setState(() {});
-                  },
-                  builder: (_, state) {
-                    final address = state.maybeWhen(
-                      orElse: () => <ReceiverAddressForm>[],
-                      success: (data) => data,
-                    );
-                    return SearchDropDownList(
-                      color: AppColors.marigoldDDust,
-                      items: address,
-                      key: UniqueKey(),
-                      defaultSelection: address
-                          .where((e) => e.parent == newform.supplierAddress)
-                          .firstOrNull,
-                      title: 'Supplier Address',
-                      hint: 'Select Supplier Address',
-                      readOnly: isCompleted,
-                      isloading: state.isLoading,
-                      futureRequest: (p0) async {
-                        final where = address.where((e) {
-                          final strList = [e.line1, e.line2, e.pincode, e.city]
-                              .nonNulls
-                              .toList();
-                          return strList
-                              .caseInsensitiveSearch(p0, (str) => str)
-                              .isNotEmpty;
-                        });
-                        return where.toList();
-                      },
-                      headerBuilder: (_, item, __) => Text('${item.parent}'),
-                      listItemBuilder: (_, e, __, ___) => CompactListTile(
-                        title: '${e.parent}',
-                        subtitle: [e.line1, e.line2, e.pincode, e.city]
-                            .nonNulls
-                            .join(', '),
-                      ),
-                      onSelected: (address) {
-                        context.cubit<CreateGateEntryCubit>().onValueChanged(
-                            supplierAddress: '${address.parent}');
-                      },
-                      focusNode: focusNodes.elementAt(5),
-                    );
-                  },
-                ),
-              ],
-            ],
-            InputField(
-              readOnly: isCompleted,
-              initialValue: newform.senderName,
-              title: 'Sender Name',
-              isRequired: false,
-              borderColor: AppColors.marigoldDDust,
-              inputFormatters: [
-                UpperCaseTextFormatter(),
-              ],
-              onChanged: (p0) {
-                context
-                    .cubit<CreateGateEntryCubit>()
-                    .onValueChanged(senderName: p0);
+                );
               },
-              focusNode: focusNodes.elementAt(6),
             ),
-            InputField(
-              readOnly: isCompleted,
-              initialValue: newform.senderMobileNo,
-              title: 'Sender Mobile No',
-              borderColor: AppColors.marigoldDDust,
-              maxLength: 10,
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp("[0-9]")),
-              ],
-              inputType: TextInputType.number,
-              onChanged: (p0) {
-                context
-                    .cubit<CreateGateEntryCubit>()
-                    .onValueChanged(senderMobileNo: p0);
-              },
-              focusNode: focusNodes.elementAt(7),
-            ),
-            const Divider(height: 1),
-            const SectoinHead(title: 'Receiver Details'),
-            InputField(
-              readOnly: isCompleted,
-              initialValue: newform.receiverName,
-              onChanged: (p0) {
-                context
-                    .cubit<CreateGateEntryCubit>()
-                    .onValueChanged(receiverName: p0);
-              },
-              title: 'Receiver Name',
-              borderColor: AppColors.marigoldDDust,
-              focusNode: focusNodes.elementAt(8),
-            ),
-            AppDropDownWidget(
-              hint: 'Select Receiver Department',
-              readOnly: isCompleted,
-              defaultSelection: newform.receiverDept,
-              title: 'Receiver Department',
-              items: AppStaticData.receiverDept,
-              onSelected: (p0) {
-                context
-                    .cubit<CreateGateEntryCubit>()
-                    .onValueChanged(receiverDept: p0);
-              },
-              color: AppColors.marigoldDDust,
-              focusNode: focusNodes.elementAt(9),
-            ),
-            InputField(
-              readOnly: isCompleted,
-              initialValue: newform.receiverMobile,
-              title: 'Receiver Mobile Number',
-              borderColor: AppColors.marigoldDDust,
-              maxLength: 10,
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp("[0-9]")),
-              ],
-              inputType: TextInputType.number,
-              onChanged: (p0) {
-                context
-                    .cubit<CreateGateEntryCubit>()
-                    .onValueChanged(receiverMobile: p0);
-              },
-              focusNode: focusNodes.elementAt(10),
-            ),
-            InputField(
-              readOnly: isCompleted,
-              initialValue: newform.receiverEmail,
-              title: 'Receiver Email',
-              borderColor: AppColors.marigoldDDust,
-              onChanged: (p0) {
-                context
-                    .cubit<CreateGateEntryCubit>()
-                    .onValueChanged(receiverEmail: p0);
-              },
-              focusNode: focusNodes.elementAt(11),
-            ),
-            const Divider(height: 1),
-            const SectoinHead(title: 'Shipment Details'),
-            InputField(
-              readOnly: isCompleted,
-              initialValue: newform.poNumber,
-              title: 'PO Number',
-              isRequired: false,
-              borderColor: AppColors.marigoldDDust,
-              onChanged: (p0) {
-                context
-                    .cubit<CreateGateEntryCubit>()
-                    .onValueChanged(poNumber: p0);
-              },
-              focusNode: focusNodes.elementAt(12),
-            ),
+
             BlocBuilder<CreateGateEntryCubit, CreateGateEntryState>(
               builder: (context, state) {
-                return CheckboxListTile(
-                  value: state.form.isewayBill == 1,
-                  onChanged: isCompleted
-                      ? null
-                      : (value) {
-                          context.cubit<CreateGateEntryCubit>().onValueChanged(
-                              isewaiBill: value == true ? 1 : 0);
-                          setState(() {});
-                        },
-                  activeColor: Colors.black,
-                  checkboxShape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4.0)),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  isThreeLine: false,
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  title: const CaptionText(
-                      title: 'Is-Eway Bill', isRequired: false),
-                  controlAffinity: ListTileControlAffinity.leading,
-                );
-              },
-            ),
-            InputField(
-              readOnly: isCompleted,
-              initialValue: newform.ewayBill,
-              title: 'Eway Bill',
-              isRequired: newform.isewayBill == 1 ? true : false,
-              borderColor: AppColors.marigoldDDust,
-              onChanged: (p0) {
-                context
-                    .cubit<CreateGateEntryCubit>()
-                    .onValueChanged(ewayBill: p0);
-              },
-              focusNode: focusNodes.elementAt(13),
-            ),
-            AppDropDownWidget(
-              hint: 'Select Vehicle Type',
-              readOnly: isCompleted,
-              defaultSelection: newform.vehicleType,
-              title: 'Vehicle Type',
-              isMandatory: true,
-              items: AppStaticData.vehicleType,
-              onSelected: (p0) {
-                context
-                    .cubit<CreateGateEntryCubit>()
-                    .onValueChanged(vehicleType: p0);
-                setState(() {});
-              },
-              color: AppColors.marigoldDDust,
-              focusNode: focusNodes.elementAt(14),
-            ),
-            InputField(
-              readOnly: isCompleted,
-              initialValue: newform.challanNumber,
-              title: 'Challan Number',
-              borderColor: AppColors.marigoldDDust,
-              onChanged: (p0) {
-                context
-                    .cubit<CreateGateEntryCubit>()
-                    .onValueChanged(challanNo: p0);
-              },
-              focusNode: focusNodes.elementAt(15),
-            ),
-            InputField(
-              readOnly: isCompleted,
-              initialValue: NumUtils.toDoubleStr(newform.peopleCount),
-              title: 'People Count',
-              inputType: TextInputType.number,
-              borderColor: AppColors.marigoldDDust,
-              onChanged: (p0) {
-                context
-                    .cubit<CreateGateEntryCubit>()
-                    .onValueChanged(peapleCount: int.tryParse(p0));
-              },
-              focusNode: focusNodes.elementAt(16),
-            ),
-            InputField(
-              readOnly: isCompleted,
-              initialValue: newform.vehicleNumber,
-              title: 'Vehicle Number',
-              isRequired: newform.vehicleType == 'By Hand' ? false : true,
-              borderColor: AppColors.marigoldDDust,
-              maxLength: 10,
-              inputFormatters: [
-                UpperCaseTextFormatter(),
-              ],
-              suffixIcon: const Icon(Icons.pin_outlined),
-              onChanged: (vehicleNo) {
-                context
-                    .cubit<CreateGateEntryCubit>()
-                    .onValueChanged(vehicleNo: vehicleNo);
-              },
-              focusNode: focusNodes.elementAt(17),
-            ),
-            InputField(
-              readOnly: isCompleted,
-              initialValue: newform.driverName,
-              title: 'Driver Name',
-              isRequired: newform.vehicleType == 'By Hand' ? false : true,
-              borderColor: AppColors.marigoldDDust,
-              inputFormatters: [
-                UpperCaseTextFormatter(),
-              ],
-              onChanged: (p0) {
-                context
-                    .cubit<CreateGateEntryCubit>()
-                    .onValueChanged(driverName: p0);
-              },
-              focusNode: focusNodes.elementAt(18),
-            ),
-            InputField(
-              readOnly: isCompleted,
-              initialValue: newform.drivermobileNo,
-              title: 'Driver Mobile Number',
-              isRequired: newform.vehicleType == 'By Hand' ? false : true,
-              borderColor: AppColors.marigoldDDust,
-              maxLength: 10,
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp("[0-9]")),
-              ],
-              inputType: TextInputType.number,
-              onChanged: (p0) {
-                context
-                    .cubit<CreateGateEntryCubit>()
-                    .onValueChanged(driverMobileNo: p0);
-              },
-              focusNode: focusNodes.elementAt(19),
-            ),
-            const Divider(height: 1),
-            const SectoinHead(title: 'Weighment Details'),
-            InputField(
-              readOnly: isCompleted,
-              initialValue: newform.weightSlipNo,
-              title: 'Weighment SLIP Token No',
-              isRequired: false,
-              borderColor: AppColors.marigoldDDust,
-              onChanged: (p0) {
-                context
-                    .cubit<CreateGateEntryCubit>()
-                    .onValueChanged(weightSlipToken: p0);
-                // setState(() {});
-              },
-              focusNode: focusNodes.elementAt(20),
-            ),
-            InputField(
-              readOnly: isCompleted,
-              initialValue: NumUtils.toDoubleStr(newform.weight),
-              inputType: TextInputType.number,
-              title: 'Weight ( in Kgs )',
-              isRequired: false,
-              borderColor: AppColors.marigoldDDust,
-              onChanged: (p0) {
-                context
-                    .cubit<CreateGateEntryCubit>()
-                    .onValueChanged(weight: double.tryParse(p0));
-              },
-              focusNode: focusNodes.elementAt(21),
-            ),
-            DateSelectionField(
-              readOnly: isCompleted,
-              initialValue: newform.weighmentDate,
-              title: 'Weighment Date',
-              isRequired: false,
-              firstDate: DFU.now().subtract(const Duration(days: 60)),
-              lastDate: DFU.now(),
-              borderColor: AppColors.marigoldDDust,
-              suffixIcon: const Icon(Icons.calendar_month_outlined,
-                  color: AppColors.chimneySweep),
-              onDateSelect: (DateTime date) {},
-              focusNode: focusNodes.elementAt(22),
-            ),
-            TimeSelectionField(
-              borderColor: AppColors.marigoldDDust,
-              readOnly: isCompleted,
-              initialValue: newform.weighmentTime?.split('.').firstOrNull,
-              title: 'Weighment Time',
-              onTimeSelect: (time) {},
-              focusNode: focusNodes.elementAt(23),
-            ),
-            const Divider(height: 1),
-            const SectoinHead(title: 'Photo Attachment'),
-          MultiFileSelectionWidget(
-              title: 'Invoice/DC Image (OCR Scanning)',
-              initialFiles: newform.invoiceImg,
-              initialValue: newform.addInvs,
-              removeFile: context.cubit<CreateGateEntryCubit>().removeFile,
-              borderColor: AppColors.marigoldDDust,
-              
-              readOnly: isCompleted,
-              focusNode: focusNodes.elementAt(24),
-              onImage: (file) {
-                context
-                    .cubit<CreateGateEntryCubit>()
-                    .onValueChanged(invoice: file);
-              },
-            ),
-            //   PhotoSelectionWidget(
-            //   borderColor: AppColors.marigoldDDust,
-            //   title: 'Invoice/DC Image(OCR Scanning)',
-            //   fileName: 'Inv_DC_Image',
-            //   imageUrl: newform.ocrScanning,
-            //   isRequired: false,
-            //   defaultValue: newform.invoiceImg.firstOrNull,
-            //   onFileCapture: (file) {
-            //     context
-            //         .cubit<CreateGateEntryCubit>()
-            //         .onValueChanged(invoice: file);
-            //   },
-            //   focusNode: focusNodes.elementAt(26),
-            // ),
-            PhotoSelectionWidget(
-              borderColor: AppColors.marigoldDDust,
-              fileName: 'Driver_License_Photo',
-              defaultValue: newform.licensePhotoImg,
-              isReadOnly: isCompleted,
-              imageUrl: newform.driversLicensePhoto,
-              title: "Driver's License Photo",
-              onFileCapture: (file) {
-                context
-                    .cubit<CreateGateEntryCubit>()
-                    .onValueChanged(licensePhoto: file);
-              },
-              focusNode: focusNodes.elementAt(24),
-            ),
-            PhotoSelectionWidget(
-              borderColor: AppColors.marigoldDDust,
-              defaultValue: newform.vehiclePhotoImg,
-              fileName: 'Vehicle_Image',
-              imageUrl: newform.vehicleImg,
-              isReadOnly: isCompleted,
-              title: 'Vehicle Image',
-              onFileCapture: (file) {
-                context
-                    .cubit<CreateGateEntryCubit>()
-                    .onValueChanged(vehiclePhoto: file);
-              },
-              focusNode: focusNodes.elementAt(25),
-            ),
-            PhotoSelectionWidget(
-              borderColor: AppColors.marigoldDDust,
-              defaultValue: newform.sealPhotoImg,
-              fileName: 'Seal_Photo',
-              imageUrl: newform.sealPhoto,
-              title: 'Seal Photo',
-              isReadOnly: isCompleted,
-              onFileCapture: (file) {
-                context
-                    .cubit<CreateGateEntryCubit>()
-                    .onValueChanged(sealPhoto: file);
-              },
-              focusNode: focusNodes.elementAt(27),
-            ),
-            PhotoSelectionWidget(
-              borderColor: AppColors.marigoldDDust,
-              defaultValue: newform.breathAnalyserImg,
-              imageUrl: newform.breathAnalyser,
-              isReadOnly: isCompleted,
-              fileName: 'Breath_Analyser',
-              title: 'Breath Analyser',
-              onFileCapture: (file) {
-                context
-                    .cubit<CreateGateEntryCubit>()
-                    .onValueChanged(breathAnalyser: file);
-              },
-              focusNode: focusNodes.elementAt(28),
-            ),
-            const Divider(height: 1),
-            const SectoinHead(title: 'Remarks'),
-            InputField(
-              borderColor: AppColors.marigoldDDust,
-              readOnly: isCompleted,
-              initialValue: newform.remarks,
-              onChanged: (p0) {
-                context
-                    .cubit<CreateGateEntryCubit>()
-                    .onValueChanged(remarks: p0);
-              },
-              title: 'Comment/Remark',
-              focusNode: focusNodes.elementAt(29),
-            ),
-            const Divider(height: 1),
-            const SectoinHead(title: 'Items'),
-            const GateEntryLinesWidget(),
-            const SizedBox(
-              height: 10,
-            ),
-            // BlocBuilder<CreateGateEntryCubit, CreateGateEntryState>(
-            //   builder: (_, state) {
-            //     return InputField(
-            //       readOnly: isCompleted,
-            //       isRequired: true,
-            //       initialValue: NumUtils.inRupeesFormat(state.form.totalAmount),
-            //       title: 'Total Amount',
-            //       borderColor: AppColors.marigoldDDust,
-            //       inputType: TextInputType.number,
-            //       // inputFormatters: [
-            //       //   FilteringTextInputFormatter.digitsOnly
-            //       // ],
-            //       onChanged: (p0) {
-            //         context
-            //             .cubit<CreateGateEntryCubit>()
-            //             .onValueChanged(totalAmount: double.tryParse(p0));
-            //       },
-            //       focusNode: focusNodes.elementAt(30),
-            //     );
-            //   },
-            // ),
-            InputField(
-                  readOnly: isCompleted,
-                  initialValue: NumUtils.inRupeesFormat(newform.totalAmount),
-                  title: 'Total Amount',
+                return InputField(
+                  readOnly: true,
+                  key: UniqueKey(),
+
+                  controller: plantCodeController,
+                  initialValue: newform.plantCode,
+                  title: 'Plant Code',
+                  isRequired: false,
                   borderColor: AppColors.marigoldDDust,
-                  inputType: TextInputType.number,
-                  isRequired: true,
-                  // inputFormatters: [
-                  //   FilteringTextInputFormatter.digitsOnly
-                  // ],
                   onChanged: (p0) {
                     context
                         .cubit<CreateGateEntryCubit>()
-                        .onValueChanged(totalAmount: double.tryParse(p0));
+                        .onValueChanged(plantCode: p0);
                   },
-                  focusNode: focusNodes.elementAt(30),
-                ),
-            AppSpacer.p32(),
-            if (!isCompleted) ...[
-              BlocBuilder<CreateGateEntryCubit, CreateGateEntryState>(
-                builder: (_, state) => AppButton(
-                  label: isCreating ? 'Create' : 'Submit',
-                  isLoading: state.isLoading,
-                  bgColor: AppColors.haintBlue,
-                  onPressed: context.cubit<CreateGateEntryCubit>().save,
-                ),
-              ),
-            ],
+                  focusNode: focusNodes.elementAt(6),
+                );
+              },
+            ),
+            BlocBuilder<CreateGateEntryCubit, CreateGateEntryState>(
+              builder: (context, state) {
+                final form = state.form;
+
+
+                if (form.deliveryChallanNo != null &&
+                    form.deliveryChallanNo!.isNotEmpty) {
+                  return const SizedBox.shrink();
+                }
+
+                return InputField(
+                  readOnly: true,
+                  key: UniqueKey(),
+                  controller: invoiceNoController,
+                  initialValue: form.invoiceNo,
+                  title: 'Invoice No',
+                  borderColor: AppColors.marigoldDDust,
+                  maxLength: 10,
+                  inputType: TextInputType.number,
+                  onChanged: (v) {
+                    context
+                        .cubit<CreateGateEntryCubit>()
+                        .onValueChanged(invoiceNo: v);
+                  },
+                  focusNode: focusNodes.elementAt(7),
+                );
+              },
+            ),
+
+            BlocBuilder<CreateGateEntryCubit, CreateGateEntryState>(
+              builder: (context, state) {
+                final form = state.form;
+
+                if (form.invoiceNo != null && form.invoiceNo!.isNotEmpty) {
+                  return const SizedBox.shrink();
+                }
+
+                return InputField(
+                  readOnly: true,
+                  key: UniqueKey(),
+                  controller: deliveryChallanController,
+                  initialValue: newform.deliveryChallanNo,
+                  title: 'Delivery Challan Number',
+                  isRequired: false,
+                  borderColor: AppColors.marigoldDDust,
+                  onChanged: (p0) {
+                    context
+                        .cubit<CreateGateEntryCubit>()
+                        .onValueChanged(deliveryChallanNo: p0);
+                  },
+                  focusNode: focusNodes.elementAt(6),
+                );
+              },
+            ),
+
+            // BlocBuilder<CreateGateEntryCubit, CreateGateEntryState>(
+            //       //  buildWhen: (previous, current) => previous != current,
+            //   builder: (context, state) {
+            //     return
+            InputField(
+              readOnly: true,
+              // key: UniqueKey(),
+              controller: invoiceDateController,
+              key: ValueKey(newform.invoiceDate),
+
+              initialValue: (() {
+                final dateStr = newform.invoiceDate;
+                if (dateStr == null || dateStr.isEmpty) return null;
+                final parsed = DateTime.tryParse(dateStr);
+                return parsed != null ? DFU.ddMMyyyy(parsed) : dateStr;
+              })(),
+              onChanged: (p0) {
+                // setState(() {
+                context
+                    .cubit<CreateGateEntryCubit>()
+                    .onValueChanged(invoiceDate: p0);
+                // });
+              },
+              title: 'Invoice Date',
+              borderColor: AppColors.marigoldDDust,
+              focusNode: focusNodes.elementAt(8),
+            ),
+            //   },
+            // ),
+            BlocBuilder<CreateGateEntryCubit, CreateGateEntryState>(
+              builder: (context, state) {
+                final form = state.form;
+
+                if (form.deliveryChallanNo != null &&
+                    form.deliveryChallanNo!.isNotEmpty) {
+                  return const SizedBox.shrink();
+                }
+
+                return InputField(
+                  readOnly: true,
+                  key: UniqueKey(),
+                  controller: sapNoController,
+                  initialValue: form.sapNo,
+                  title: 'SAP No',
+                  borderColor: AppColors.marigoldDDust,
+                  onChanged: (v) {
+                    context
+                        .cubit<CreateGateEntryCubit>()
+                        .onValueChanged(sapNo: v);
+                  },
+                  focusNode: focusNodes.elementAt(8),
+                );
+              },
+            ),
+
+// if (isCreating) ...[
+            BlocBuilder<CreateGateEntryCubit, CreateGateEntryState>(
+              builder: (_, state) {
+                final shouldShowButton =
+                    state.isNew && state.view == GateEntryView.create;
+                if (!shouldShowButton) {
+                  return const SizedBox.shrink();
+                }
+
+                return AppButton(
+                    label: state.view.toName(),
+                    isLoading: state.isLoading,
+                    bgColor: AppColors.haintBlue,
+                    margin: const EdgeInsets.all(12.0),
+                    onPressed: () {
+
+                      context.cubit<CreateGateEntryCubit>().save();
+                    });
+              },
+            ),
+// ],
           ],
         ),
       ),
     );
+  }
+
+
+
+  Future<void> extractTextFromImage(String imagePath) async {
+    final inputImage = InputImage.fromFilePath(imagePath);
+    final textRecognizer = TextRecognizer();
+
+    final recognizedText = await textRecognizer.processImage(inputImage);
+    final fullText = recognizedText.text;
+    debugPrint('📝 Extracted Text:\n$fullText');
+
+
+    final docType = detectDocumentType(fullText);
+
+
+    List<String> _extractAllDates(String text) {
+      final patterns = [
+        r'\b\d{2}[^0-9]{1,2}\d{2}[^0-9]{1,2}\d{4}\b',
+        r'\b\d{2}(?:\.{1,2}|\s)\d{2}(?:\.{1,2}|\s)\d{4}\b',
+        
+        r'\b\d{2}\s\d{2}\s\d{4}\b',
+      ];
+
+      final dates = <String>[];
+
+      for (var p in patterns) {
+        dates.addAll(RegExp(p).allMatches(text).map((m) => m.group(0)!));
+      }
+
+      return dates;
+    }
+
+    String? selectInvoiceDate(List<String> dates) {
+      if (dates.isEmpty) return null;
+
+      if (dates.length == 1) {
+        return dates.first; 
+      }
+
+      return dates[1]; 
+    }
+
+
+
+    String? extractDeliveryChallanNo(String text) {
+      final regex = RegExp(
+        r'Delivery\s*Challan\s*Number\s*[:\-\s]*([\d]+)',
+        caseSensitive: false,
+      );
+      return regex.firstMatch(text)?.group(1)?.trim() ??
+          RegExp(r'\d{6,}').firstMatch(text)?.group(0);
+    }
+
+
+    List<String> getAllTenDigitNumbers(String text,
+        {bool excludeHighStart = false}) {
+      final regex = RegExp(r'\b\d{10}\b');
+      return regex
+          .allMatches(text)
+          .map((m) => m.group(0)!)
+          .where((num) => !excludeHighStart || num.startsWith(RegExp(r'[0-4]')))
+          .toList();
+    }
+
+    final cubit = context.cubit<CreateGateEntryCubit>();
+
+    final allDates = _extractAllDates(fullText);
+    debugPrint('📅 All Detected Dates: $allDates');
+
+
+    final extractedDate = selectInvoiceDate(allDates);
+    debugPrint('📌 Selected Invoice Date: $extractedDate');
+
+    setState(() {
+      if (docType == DocumentType.deliveryChallan) {
+        final deliveryChallan = extractDeliveryChallanNo(fullText);
+        final plantCode =
+            (deliveryChallan != null && deliveryChallan.length >= 4)
+                ? deliveryChallan.substring(0, 4)
+                : null;
+
+        cubit.onValueChanged(
+          deliveryChallanNo: deliveryChallan,
+          invoiceDate: extractedDate,
+          invoiceNo: null,
+          plantCode: plantCode,
+          sapNo: null,
+        );
+        debugPrint('✅ Delivery Challan processed');
+        return;
+      }
+    });
+
+ 
+    final tenDigitNumbers =
+        getAllTenDigitNumbers(fullText, excludeHighStart: true);
+
+    final invoiceNo = tenDigitNumbers.isNotEmpty ? tenDigitNumbers.first : null;
+    final sapNo = tenDigitNumbers.length > 1 ? tenDigitNumbers[1] : null;
+
+    final plantCode = (invoiceNo != null && invoiceNo.length >= 4)
+        ? invoiceNo.substring(0, 4)
+        : null;
+
+    cubit.onValueChanged(
+      invoiceNo: invoiceNo,
+      sapNo: sapNo,
+      invoiceDate: extractedDate,
+      deliveryChallanNo: null,
+      plantCode: plantCode,
+    );
+
+    debugPrint('🧾 Invoice processed');
+    debugPrint('📄 Invoice No: $invoiceNo');
+    debugPrint('🔍 SAP No: $sapNo');
+    debugPrint('📅 Date: $extractedDate');
+    debugPrint('🏷️ Plant Code: $plantCode');
+
+    return;
   }
 }

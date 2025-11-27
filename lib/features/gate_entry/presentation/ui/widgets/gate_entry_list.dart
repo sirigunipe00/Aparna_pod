@@ -1,7 +1,7 @@
 import 'package:aparna_pod/app/widgets/app_page_view2.dart';
 import 'package:aparna_pod/core/core.dart';
 import 'package:aparna_pod/core/model/page_view_filters.dart';
-import 'package:aparna_pod/features/gate_entry/model/gate_entry_form.dart';
+import 'package:aparna_pod/features/gate_entry/model/pod_upload_form.dart';
 import 'package:aparna_pod/features/gate_entry/presentation/bloc/bloc_provider.dart';
 import 'package:aparna_pod/features/gate_entry/presentation/bloc/gate_entry_filter_cubit.dart';
 import 'package:aparna_pod/features/gate_entry/presentation/ui/widgets/gate_entry_widget.dart';
@@ -20,20 +20,44 @@ class GateEntryListScrn extends StatelessWidget {
       mode: PageMode2.gateentry,
       scaffoldBg: AppIcons.bgFrame1.path,
       backgroundColor: AppColors.marigoldDDust,
-      onNew: () => AppRoute.newGateEntry.push(context),
+      // onNew: () => AppRoute.newGateEntry.push(context),
+      onNew: () async {
+        final refresh = await AppRoute.newGateEntry.push<bool>(context);
+        if(!context.mounted) return;
+        if (refresh == true) {
+          _fetchInital(context);
+        }
+      },
+       child: RefreshIndicator(
+        onRefresh: () {
+          final filters = context.read<GateEntryFilterCubit>().state;
+
+          return context.cubit<GateEntriesCubit>().fetchInitial(
+            Pair(StringUtils.docStatusInt(filters.status), filters.query),
+          );
+        },
       child: BlocListener<GateEntryFilterCubit, PageViewFilters>(
         listener: (_, state) => _fetchInital(context),
-        child: InfiniteListViewWidget<GateEntriesCubit, GateEntryForm>(
+        child: InfiniteListViewWidget<GateEntriesCubit, PodUploadForm>(
           childBuilder: (context, entry) => GateEntryWidget(
             gateEntry: entry,
-            onTap: () =>
-                AppRoute.newGateEntry.push<bool?>(context, extra: entry),
+             onTap: () async {
+                      final refresh = await AppRoute.newGateEntry.push<bool?>(
+                        context,
+                        extra: entry,
+                      );
+                      if(!context.mounted) return;
+                      if (refresh == true) {
+                        _fetchInital(context);
+                      }
+                    },
           ),
           fetchInitial: () => _fetchInital(context),
           fetchMore: () => fetchMore(context),
-          emptyListText: 'No GateEntries Found.',
+          emptyListText: 'No POD Found.',
         ),
       ),
+       ),
     );
   }
 

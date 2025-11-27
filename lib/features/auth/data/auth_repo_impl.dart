@@ -32,8 +32,8 @@ class AuthRepoImpl extends BaseApiRepository implements AuthRepo {
       final requestConfig = RequestConfig(
         url: Urls.getUsers,
         parser: (res) {
-          final data = res['message']['data'] as List<dynamic>;
-          return LoggedInUser.fromJson(data.first);
+          final data = res['message'] as Map<String, dynamic>;
+          return LoggedInUser.fromJson(data);
         },
         body: jsonEncode({'usr' : username, 'pwd' : pswd}),
       );
