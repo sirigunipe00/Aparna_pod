@@ -16,6 +16,7 @@ _$PodUploadFormImpl _$$PodUploadFormImplFromJson(Map<String, dynamic> json) =>
       sapNo: json['sap_no'] as String?,
       invoiceNo: json['invoice_no'] as String?,
       deliveryChallanNo: json['delivery_challan_no'] as String?,
+      remarks: json['remarks'] as String?,
       files: (json['files'] as List<dynamic>?)
           ?.map((e) => e as Map<String, dynamic>)
           .toList(),
@@ -31,5 +32,6 @@ Map<String, dynamic> _$$PodUploadFormImplToJson(_$PodUploadFormImpl instance) =>
       'sap_no': instance.sapNo,
       'invoice_no': instance.invoiceNo,
       'delivery_challan_no': instance.deliveryChallanNo,
+      'remarks': instance.remarks,
       'files': instance.files,
     };

@@ -35,6 +35,7 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
   final deliveryChallanController = TextEditingController();
   final sapNoController = TextEditingController();
   final plantCodeController = TextEditingController();
+  final remarks = TextEditingController();
 
   @override
   void dispose() {
@@ -43,6 +44,7 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
     deliveryChallanController.dispose();
     sapNoController.dispose();
     plantCodeController.dispose();
+    remarks.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -51,7 +53,7 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
   @override
   Widget build(BuildContext context) {
     final formState = context.watch<CreateGateEntryCubit>().state;
-    // final isCompleted = formState.view == GateEntryView.completed;
+    final isCompleted = formState.view == GateEntryView.completed;
     final newform = formState.form;
 
     $logger.devLog('form..............$newform');
@@ -165,7 +167,6 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
                 return InputField(
                   readOnly: true,
                   key: UniqueKey(),
-
                   controller: plantCodeController,
                   initialValue: newform.plantCode,
                   title: 'Plant Code',
@@ -183,7 +184,6 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
             BlocBuilder<CreateGateEntryCubit, CreateGateEntryState>(
               builder: (context, state) {
                 final form = state.form;
-
 
                 if (form.deliveryChallanNo != null &&
                     form.deliveryChallanNo!.isNotEmpty) {
@@ -289,6 +289,25 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
                 );
               },
             ),
+            BlocBuilder<CreateGateEntryCubit, CreateGateEntryState>(
+              builder: (context, state) {
+                return InputField(
+                  controller: remarks,
+                  minLines: 3,
+                  readOnly: isCompleted,
+                  borderColor: AppColors.marigoldDDust,
+                  maxLines: 6,
+                  hintText: 'Enter Here.....',
+                  initialValue: newform.remarks,
+                  title: 'Remarks (if any)',
+                  onChanged: (text) {
+                    context.cubit<CreateGateEntryCubit>().onValueChanged(
+                          remarks: text,
+                        );
+                  },
+                );
+              },
+            ),
 
 // if (isCreating) ...[
             BlocBuilder<CreateGateEntryCubit, CreateGateEntryState>(
@@ -305,7 +324,6 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
                     bgColor: AppColors.haintBlue,
                     margin: const EdgeInsets.all(12.0),
                     onPressed: () {
-
                       context.cubit<CreateGateEntryCubit>().save();
                     });
               },
@@ -317,8 +335,6 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
     );
   }
 
-
-
   Future<void> extractTextFromImage(String imagePath) async {
     final inputImage = InputImage.fromFilePath(imagePath);
     final textRecognizer = TextRecognizer();
@@ -327,15 +343,12 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
     final fullText = recognizedText.text;
     debugPrint('📝 Extracted Text:\n$fullText');
 
-
     final docType = detectDocumentType(fullText);
-
 
     List<String> _extractAllDates(String text) {
       final patterns = [
         r'\b\d{2}[^0-9]{1,2}\d{2}[^0-9]{1,2}\d{4}\b',
         r'\b\d{2}(?:\.{1,2}|\s)\d{2}(?:\.{1,2}|\s)\d{4}\b',
-        
         r'\b\d{2}\s\d{2}\s\d{4}\b',
       ];
 
@@ -352,13 +365,11 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
       if (dates.isEmpty) return null;
 
       if (dates.length == 1) {
-        return dates.first; 
+        return dates.first;
       }
 
-      return dates[1]; 
+      return dates[1];
     }
-
-
 
     String? extractDeliveryChallanNo(String text) {
       final regex = RegExp(
@@ -368,7 +379,6 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
       return regex.firstMatch(text)?.group(1)?.trim() ??
           RegExp(r'\d{6,}').firstMatch(text)?.group(0);
     }
-
 
     List<String> getAllTenDigitNumbers(String text,
         {bool excludeHighStart = false}) {
@@ -384,7 +394,6 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
 
     final allDates = _extractAllDates(fullText);
     debugPrint('📅 All Detected Dates: $allDates');
-
 
     final extractedDate = selectInvoiceDate(allDates);
     debugPrint('📌 Selected Invoice Date: $extractedDate');
@@ -409,7 +418,6 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
       }
     });
 
- 
     final tenDigitNumbers =
         getAllTenDigitNumbers(fullText, excludeHighStart: true);
 

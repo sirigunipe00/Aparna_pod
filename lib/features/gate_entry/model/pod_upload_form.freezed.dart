@@ -26,17 +26,19 @@ mixin _$PodUploadForm {
   int? get docStatus => throw _privateConstructorUsedError;
   @JsonKey(name: 'name')
   String? get name => throw _privateConstructorUsedError;
-  @JsonKey(name: "plant_code")
+  @JsonKey(name: 'plant_code')
   String? get plantCode => throw _privateConstructorUsedError;
-  @JsonKey(name: "date")
+  @JsonKey(name: 'date')
   String? get invoiceDate => throw _privateConstructorUsedError;
-  @JsonKey(name: "sap_no")
+  @JsonKey(name: 'sap_no')
   String? get sapNo => throw _privateConstructorUsedError;
-  @JsonKey(name: "invoice_no")
+  @JsonKey(name: 'invoice_no')
   String? get invoiceNo => throw _privateConstructorUsedError;
-  @JsonKey(name: "delivery_challan_no")
+  @JsonKey(name: 'delivery_challan_no')
   String? get deliveryChallanNo => throw _privateConstructorUsedError;
-  @JsonKey(name: "files")
+  @JsonKey(name: 'remarks')
+  String? get remarks => throw _privateConstructorUsedError;
+  @JsonKey(name: 'files')
   List<Map<String, dynamic>>? get files => throw _privateConstructorUsedError;
   @JsonKey(includeToJson: false, includeFromJson: false)
   List<File>? get invoiceFiles => throw _privateConstructorUsedError;
@@ -61,12 +63,13 @@ abstract class $PodUploadFormCopyWith<$Res> {
       {@JsonKey(name: 'creation') String? creation,
       @JsonKey(name: 'docstatus') int? docStatus,
       @JsonKey(name: 'name') String? name,
-      @JsonKey(name: "plant_code") String? plantCode,
-      @JsonKey(name: "date") String? invoiceDate,
-      @JsonKey(name: "sap_no") String? sapNo,
-      @JsonKey(name: "invoice_no") String? invoiceNo,
-      @JsonKey(name: "delivery_challan_no") String? deliveryChallanNo,
-      @JsonKey(name: "files") List<Map<String, dynamic>>? files,
+      @JsonKey(name: 'plant_code') String? plantCode,
+      @JsonKey(name: 'date') String? invoiceDate,
+      @JsonKey(name: 'sap_no') String? sapNo,
+      @JsonKey(name: 'invoice_no') String? invoiceNo,
+      @JsonKey(name: 'delivery_challan_no') String? deliveryChallanNo,
+      @JsonKey(name: 'remarks') String? remarks,
+      @JsonKey(name: 'files') List<Map<String, dynamic>>? files,
       @JsonKey(includeToJson: false, includeFromJson: false)
       List<File>? invoiceFiles});
 }
@@ -94,6 +97,7 @@ class _$PodUploadFormCopyWithImpl<$Res, $Val extends PodUploadForm>
     Object? sapNo = freezed,
     Object? invoiceNo = freezed,
     Object? deliveryChallanNo = freezed,
+    Object? remarks = freezed,
     Object? files = freezed,
     Object? invoiceFiles = freezed,
   }) {
@@ -130,6 +134,10 @@ class _$PodUploadFormCopyWithImpl<$Res, $Val extends PodUploadForm>
           ? _value.deliveryChallanNo
           : deliveryChallanNo // ignore: cast_nullable_to_non_nullable
               as String?,
+      remarks: freezed == remarks
+          ? _value.remarks
+          : remarks // ignore: cast_nullable_to_non_nullable
+              as String?,
       files: freezed == files
           ? _value.files
           : files // ignore: cast_nullable_to_non_nullable
@@ -154,12 +162,13 @@ abstract class _$$PodUploadFormImplCopyWith<$Res>
       {@JsonKey(name: 'creation') String? creation,
       @JsonKey(name: 'docstatus') int? docStatus,
       @JsonKey(name: 'name') String? name,
-      @JsonKey(name: "plant_code") String? plantCode,
-      @JsonKey(name: "date") String? invoiceDate,
-      @JsonKey(name: "sap_no") String? sapNo,
-      @JsonKey(name: "invoice_no") String? invoiceNo,
-      @JsonKey(name: "delivery_challan_no") String? deliveryChallanNo,
-      @JsonKey(name: "files") List<Map<String, dynamic>>? files,
+      @JsonKey(name: 'plant_code') String? plantCode,
+      @JsonKey(name: 'date') String? invoiceDate,
+      @JsonKey(name: 'sap_no') String? sapNo,
+      @JsonKey(name: 'invoice_no') String? invoiceNo,
+      @JsonKey(name: 'delivery_challan_no') String? deliveryChallanNo,
+      @JsonKey(name: 'remarks') String? remarks,
+      @JsonKey(name: 'files') List<Map<String, dynamic>>? files,
       @JsonKey(includeToJson: false, includeFromJson: false)
       List<File>? invoiceFiles});
 }
@@ -185,6 +194,7 @@ class __$$PodUploadFormImplCopyWithImpl<$Res>
     Object? sapNo = freezed,
     Object? invoiceNo = freezed,
     Object? deliveryChallanNo = freezed,
+    Object? remarks = freezed,
     Object? files = freezed,
     Object? invoiceFiles = freezed,
   }) {
@@ -221,6 +231,10 @@ class __$$PodUploadFormImplCopyWithImpl<$Res>
           ? _value.deliveryChallanNo
           : deliveryChallanNo // ignore: cast_nullable_to_non_nullable
               as String?,
+      remarks: freezed == remarks
+          ? _value.remarks
+          : remarks // ignore: cast_nullable_to_non_nullable
+              as String?,
       files: freezed == files
           ? _value._files
           : files // ignore: cast_nullable_to_non_nullable
@@ -240,12 +254,13 @@ class _$PodUploadFormImpl implements _PodUploadForm {
       {@JsonKey(name: 'creation') this.creation,
       @JsonKey(name: 'docstatus') this.docStatus,
       @JsonKey(name: 'name') this.name,
-      @JsonKey(name: "plant_code") this.plantCode,
-      @JsonKey(name: "date") this.invoiceDate,
-      @JsonKey(name: "sap_no") this.sapNo,
-      @JsonKey(name: "invoice_no") this.invoiceNo,
-      @JsonKey(name: "delivery_challan_no") this.deliveryChallanNo,
-      @JsonKey(name: "files") final List<Map<String, dynamic>>? files,
+      @JsonKey(name: 'plant_code') this.plantCode,
+      @JsonKey(name: 'date') this.invoiceDate,
+      @JsonKey(name: 'sap_no') this.sapNo,
+      @JsonKey(name: 'invoice_no') this.invoiceNo,
+      @JsonKey(name: 'delivery_challan_no') this.deliveryChallanNo,
+      @JsonKey(name: 'remarks') this.remarks,
+      @JsonKey(name: 'files') final List<Map<String, dynamic>>? files,
       @JsonKey(includeToJson: false, includeFromJson: false)
       final List<File>? invoiceFiles})
       : _files = files,
@@ -264,23 +279,26 @@ class _$PodUploadFormImpl implements _PodUploadForm {
   @JsonKey(name: 'name')
   final String? name;
   @override
-  @JsonKey(name: "plant_code")
+  @JsonKey(name: 'plant_code')
   final String? plantCode;
   @override
-  @JsonKey(name: "date")
+  @JsonKey(name: 'date')
   final String? invoiceDate;
   @override
-  @JsonKey(name: "sap_no")
+  @JsonKey(name: 'sap_no')
   final String? sapNo;
   @override
-  @JsonKey(name: "invoice_no")
+  @JsonKey(name: 'invoice_no')
   final String? invoiceNo;
   @override
-  @JsonKey(name: "delivery_challan_no")
+  @JsonKey(name: 'delivery_challan_no')
   final String? deliveryChallanNo;
+  @override
+  @JsonKey(name: 'remarks')
+  final String? remarks;
   final List<Map<String, dynamic>>? _files;
   @override
-  @JsonKey(name: "files")
+  @JsonKey(name: 'files')
   List<Map<String, dynamic>>? get files {
     final value = _files;
     if (value == null) return null;
@@ -302,7 +320,7 @@ class _$PodUploadFormImpl implements _PodUploadForm {
 
   @override
   String toString() {
-    return 'PodUploadForm(creation: $creation, docStatus: $docStatus, name: $name, plantCode: $plantCode, invoiceDate: $invoiceDate, sapNo: $sapNo, invoiceNo: $invoiceNo, deliveryChallanNo: $deliveryChallanNo, files: $files, invoiceFiles: $invoiceFiles)';
+    return 'PodUploadForm(creation: $creation, docStatus: $docStatus, name: $name, plantCode: $plantCode, invoiceDate: $invoiceDate, sapNo: $sapNo, invoiceNo: $invoiceNo, deliveryChallanNo: $deliveryChallanNo, remarks: $remarks, files: $files, invoiceFiles: $invoiceFiles)';
   }
 
   @override
@@ -324,6 +342,7 @@ class _$PodUploadFormImpl implements _PodUploadForm {
                 other.invoiceNo == invoiceNo) &&
             (identical(other.deliveryChallanNo, deliveryChallanNo) ||
                 other.deliveryChallanNo == deliveryChallanNo) &&
+            (identical(other.remarks, remarks) || other.remarks == remarks) &&
             const DeepCollectionEquality().equals(other._files, _files) &&
             const DeepCollectionEquality()
                 .equals(other._invoiceFiles, _invoiceFiles));
@@ -341,6 +360,7 @@ class _$PodUploadFormImpl implements _PodUploadForm {
       sapNo,
       invoiceNo,
       deliveryChallanNo,
+      remarks,
       const DeepCollectionEquality().hash(_files),
       const DeepCollectionEquality().hash(_invoiceFiles));
 
@@ -365,12 +385,13 @@ abstract class _PodUploadForm implements PodUploadForm {
       {@JsonKey(name: 'creation') final String? creation,
       @JsonKey(name: 'docstatus') final int? docStatus,
       @JsonKey(name: 'name') final String? name,
-      @JsonKey(name: "plant_code") final String? plantCode,
-      @JsonKey(name: "date") final String? invoiceDate,
-      @JsonKey(name: "sap_no") final String? sapNo,
-      @JsonKey(name: "invoice_no") final String? invoiceNo,
-      @JsonKey(name: "delivery_challan_no") final String? deliveryChallanNo,
-      @JsonKey(name: "files") final List<Map<String, dynamic>>? files,
+      @JsonKey(name: 'plant_code') final String? plantCode,
+      @JsonKey(name: 'date') final String? invoiceDate,
+      @JsonKey(name: 'sap_no') final String? sapNo,
+      @JsonKey(name: 'invoice_no') final String? invoiceNo,
+      @JsonKey(name: 'delivery_challan_no') final String? deliveryChallanNo,
+      @JsonKey(name: 'remarks') final String? remarks,
+      @JsonKey(name: 'files') final List<Map<String, dynamic>>? files,
       @JsonKey(includeToJson: false, includeFromJson: false)
       final List<File>? invoiceFiles}) = _$PodUploadFormImpl;
 
@@ -387,22 +408,25 @@ abstract class _PodUploadForm implements PodUploadForm {
   @JsonKey(name: 'name')
   String? get name;
   @override
-  @JsonKey(name: "plant_code")
+  @JsonKey(name: 'plant_code')
   String? get plantCode;
   @override
-  @JsonKey(name: "date")
+  @JsonKey(name: 'date')
   String? get invoiceDate;
   @override
-  @JsonKey(name: "sap_no")
+  @JsonKey(name: 'sap_no')
   String? get sapNo;
   @override
-  @JsonKey(name: "invoice_no")
+  @JsonKey(name: 'invoice_no')
   String? get invoiceNo;
   @override
-  @JsonKey(name: "delivery_challan_no")
+  @JsonKey(name: 'delivery_challan_no')
   String? get deliveryChallanNo;
   @override
-  @JsonKey(name: "files")
+  @JsonKey(name: 'remarks')
+  String? get remarks;
+  @override
+  @JsonKey(name: 'files')
   List<Map<String, dynamic>>? get files;
   @override
   @JsonKey(includeToJson: false, includeFromJson: false)

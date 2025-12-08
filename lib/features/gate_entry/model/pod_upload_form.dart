@@ -11,13 +11,14 @@ class PodUploadForm with _$PodUploadForm {
     @JsonKey(name: 'docstatus') int? docStatus,
     @JsonKey(name: 'name') String? name,
 
-    @JsonKey(name: "plant_code") String? plantCode,
-    @JsonKey(name: "date") String? invoiceDate,
-    @JsonKey(name: "sap_no") String? sapNo,
-    @JsonKey(name: "invoice_no") String? invoiceNo,
-    @JsonKey(name: "delivery_challan_no") String? deliveryChallanNo,
+    @JsonKey(name: 'plant_code') String? plantCode,
+    @JsonKey(name: 'date') String? invoiceDate,
+    @JsonKey(name: 'sap_no') String? sapNo,
+    @JsonKey(name: 'invoice_no') String? invoiceNo,
+    @JsonKey(name: 'delivery_challan_no') String? deliveryChallanNo,
+    @JsonKey(name: 'remarks') String? remarks,
 
-    @JsonKey(name: "files") List<Map<String, dynamic>>? files,
+    @JsonKey(name: 'files') List<Map<String, dynamic>>? files,
 
     @JsonKey(includeToJson: false, includeFromJson: false)
     List<File>? invoiceFiles,

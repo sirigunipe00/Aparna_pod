@@ -5,10 +5,10 @@ final _reqisteredUrl = $sl.get<Urls>(instanceName: 'baseUrl');
 class Urls {
   factory Urls.aparnaUAT() =>
       const Urls('http://192.168.3.64/api');
-      factory Urls.local() => const Urls('http://192.168.0.134:8000/api');
+      factory Urls.local() => const Urls('http://192.168.245.250:8000/api');
   factory Urls.aparnaLive() => const Urls('https://aparnagmlive.easycloud.co.in/api');
 
-  const Urls(this.url);
+const Urls(this.url);
 
   final String url;
 

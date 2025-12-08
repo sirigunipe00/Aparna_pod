@@ -32,9 +32,9 @@ class GateEntryRepoImpl extends BaseApiRepository implements GateEntryRepo {
       reqParams: {
         if (!(docStatus == null)) ...{
           'filters': [
-            ["docstatus", "=", docStatus],
+            ['docstatus', '=', docStatus],
             if (search.containsValidValue) ...{
-              ["name", "Like", "%$search%"]
+              ['name', 'Like', '%$search%']
             }
           ],
         },
@@ -42,7 +42,7 @@ class GateEntryRepoImpl extends BaseApiRepository implements GateEntryRepo {
         'limit': 20,
         'order_by': 'creation DESC',
         'doctype': 'POD Invoice',
-        'fields': ["*"]
+        'fields': ['*']
       },
       headers: {HttpHeaders.contentTypeHeader: 'application/json'},
     );
@@ -82,17 +82,17 @@ class GateEntryRepoImpl extends BaseApiRepository implements GateEntryRepo {
         if (base64String.isEmpty) {
           throw Exception('Base64 encoding failed: empty string');
         }
-        String finalFileName = "";
+        String finalFileName = '';
         if (form.deliveryChallanNo != null &&
             form.deliveryChallanNo!.isNotEmpty) {
-              finalFileName = "${form.deliveryChallanNo}_deliveryChallan.pdf";
+              finalFileName = '${form.deliveryChallanNo}_deliveryChallan.pdf';
         } else {
-          finalFileName = "${form.sapNo}_invoice.pdf";
+          finalFileName = '${form.sapNo}_invoice.pdf';
           }
 
         filesList.add({
-          "filename": finalFileName,
-          "filedata": base64String,
+          'filename': finalFileName,
+          'filedata': base64String,
         });
 
       } catch (e, stackTrace) {
@@ -102,12 +102,13 @@ class GateEntryRepoImpl extends BaseApiRepository implements GateEntryRepo {
     }
 
     final payload = {
-      "plant_code": form.plantCode,
-      "invoice_date": formattedDate,
-      "sap_no": form.deliveryChallanNo != null ? null : form.sapNo,
-      "invoice_no": form.deliveryChallanNo != null ? null : form.invoiceNo,
-      "delivery_challan_no": form.deliveryChallanNo,
-      "files": filesList,
+      'plant_code': form.plantCode,
+      'invoice_date': formattedDate,
+      'sap_no': form.deliveryChallanNo != null ? null : form.sapNo,
+      'invoice_no': form.deliveryChallanNo != null ? null : form.invoiceNo,
+      'delivery_challan_no': form.deliveryChallanNo,
+      'files': filesList,
+      'remarks': form.remarks,
     };
     final requestConfig = RequestConfig(
       url: Urls.podUpload,

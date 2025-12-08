@@ -37,6 +37,7 @@ class CreateGateEntryCubit extends AppBaseCubit<CreateGateEntryState> {
     String? deliveryChallanNo,
     String? creation,
     int? docStatus,
+    String? remarks,
   }) async {
     final form = state.form;
 
@@ -51,6 +52,7 @@ class CreateGateEntryCubit extends AppBaseCubit<CreateGateEntryState> {
 
       creation: creation ?? form.creation,
       docStatus: docStatus ?? form.docStatus,
+      remarks: remarks ?? form.remarks,
 
       // ✅ Replace the entire list
       invoiceFiles: invoiceFiles ?? form.invoiceFiles,
@@ -108,6 +110,7 @@ class CreateGateEntryCubit extends AppBaseCubit<CreateGateEntryState> {
         docStatus: entry.docStatus,
         deliveryChallanNo: entry.deliveryChallanNo,
         creation: entry.creation,
+        remarks: entry.remarks,
         invoiceFiles: entry.invoiceFiles,
       );
 
@@ -187,7 +190,7 @@ Option<Pair<String, int?>> _validate() {
 
 
   if (form.invoiceFiles == null || form.invoiceFiles!.isEmpty) {
-    return const Some(Pair("Please upload at least one document image", 0));
+    return const Some(Pair('Please upload at least one document image', 0));
   }
 
 
@@ -197,15 +200,15 @@ Option<Pair<String, int?>> _validate() {
   if (isDeliveryChallan) {
 
     if (form.deliveryChallanNo == null || form.deliveryChallanNo!.isEmpty) {
-      return const Some(Pair("Delivery Challan No is required", 6));
+      return const Some(Pair('Delivery Challan No is required', 6));
     }
 
     if (form.invoiceDate == null || form.invoiceDate!.isEmpty) {
-      return const Some(Pair("Invoice Date is required", 8));
+      return const Some(Pair('Invoice Date is required', 8));
     }
 
     if (form.plantCode == null || form.plantCode!.isEmpty) {
-      return const Some(Pair("Plant Code is required", 6));
+      return const Some(Pair('Plant Code is required', 6));
     }
 
 
@@ -214,19 +217,19 @@ Option<Pair<String, int?>> _validate() {
 
  
   if (form.invoiceNo == null || form.invoiceNo!.isEmpty) {
-    return const Some(Pair("Invoice No is required", 7));
+    return const Some(Pair('Invoice No is required', 7));
   }
 
   if (form.invoiceDate == null || form.invoiceDate!.isEmpty) {
-    return const Some(Pair("Invoice Date is required", 8));
+    return const Some(Pair('Invoice Date is required', 8));
   }
 
   if (form.sapNo == null || form.sapNo!.isEmpty) {
-    return const Some(Pair("SAP No is required", 8));
+    return const Some(Pair('SAP No is required', 8));
   }
 
   if (form.plantCode == null || form.plantCode!.isEmpty) {
-    return const Some(Pair("Plant Code is required", 6));
+    return const Some(Pair('Plant Code is required', 6));
   }
 
   // All Invoice validations pass

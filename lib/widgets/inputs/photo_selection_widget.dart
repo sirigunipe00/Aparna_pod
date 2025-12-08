@@ -18,7 +18,7 @@ enum DocumentType { invoice, deliveryChallan }
 DocumentType detectDocumentType(String text) {
   final t = text.toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
 
-  if (t.contains("delivery challan number") || t.contains("delivery challan")) {
+  if (t.contains('delivery challan number') || t.contains('delivery challan')) {
     return DocumentType.deliveryChallan;
   }
 
@@ -211,6 +211,7 @@ class _PhotoSelectionWidgetState extends State<PhotoSelectionWidget>
     final List<String>? pictures = await CunningDocumentScanner.getPictures(
       noOfPages: 5,
       isGalleryImportAllowed: false,
+   
     );
 
     if (pictures == null || pictures.isEmpty) return;
@@ -234,7 +235,7 @@ class _PhotoSelectionWidgetState extends State<PhotoSelectionWidget>
     }
 
   } catch (e) {
-    debugPrint("Scanner Error: $e");
+    debugPrint('Scanner Error: $e');
   }
 }
 
@@ -341,7 +342,7 @@ class _PhotoSelectionWidgetState extends State<PhotoSelectionWidget>
     // rename
     final renamedPath = path.join(
       dir,
-      "${widget.fileName}_${DateTime.now().millisecondsSinceEpoch}$ext",
+      '${widget.fileName}_${DateTime.now().millisecondsSinceEpoch}$ext',
     );
 
     final renamedFile = await file.copy(renamedPath);
@@ -385,7 +386,7 @@ class _PhotoSelectionWidgetState extends State<PhotoSelectionWidget>
               if (_selectedImages.isNotEmpty) {
                 context.goToPage(
                   ImagePreviewPage(
-                    title: widget.title ?? "",
+                    title: widget.title ?? '',
                     images: _selectedImages,
                     initialIndex: 0,
                   ),
@@ -419,7 +420,7 @@ class _PhotoSelectionWidgetState extends State<PhotoSelectionWidget>
                 IconButton(
                   onPressed: _pickFromCamera,
                   icon: Icon(Icons.camera_alt, color: widget.borderColor),
-                  tooltip: "Capture from camera",
+                  tooltip: 'Capture from camera',
                 ),
                 // IconButton(
                 //   onPressed: _pickFromGallery,
@@ -437,7 +438,7 @@ class _PhotoSelectionWidgetState extends State<PhotoSelectionWidget>
                 return GestureDetector(
                   onTap: () => context.goToPage(
                     ImagePreviewPage(
-                      title: widget.title ?? "",
+                      title: widget.title ?? '',
                       images: _selectedImages,
                       initialIndex: _selectedImages.indexOf(img),
                     ),
@@ -489,6 +490,7 @@ class _PhotoSelectionWidgetState extends State<PhotoSelectionWidget>
                                       invoiceDate: '',
                                       deliveryChallanNo: '',
                                       plantCode: '',
+                                      remarks: '',
                                     );
                               }
                             },
