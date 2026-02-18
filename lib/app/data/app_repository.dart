@@ -29,8 +29,7 @@ class AppRepository extends BaseApiRepository {
       }
       final serverVersion = data['app_version'];
       final appVersionStr = await appVersion.getAppVersion();
-      print("APPVERSION:$appVersionStr");
-      print("SERVER VERSION:$serverVersion");
+
       if (appVersionStr.compareTo(serverVersion) < 0) {
         return right(true);
       }

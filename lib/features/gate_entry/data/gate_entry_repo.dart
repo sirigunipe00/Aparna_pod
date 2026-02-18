@@ -10,12 +10,4 @@ abstract interface class GateEntryRepo {
 
   AsyncValueOf<Pair<String, String>> createGateEntry(
       PodUploadForm form);
- 
-
-  //  AsyncValueOf<String> deleteLines(
-  //   String id, List<String> lines
-  // );
-
-   
-  
 }

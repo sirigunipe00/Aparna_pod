@@ -63,11 +63,11 @@ class GateEntryWidget extends StatelessWidget {
     );
   }
   String getFormType(PodUploadForm form) {
-  // Example logic — customize based on your real data
-  if (form.deliveryChallanNo?.startsWith("8") ?? false) {
-    return "Delivery Challan";
+
+  if (form.deliveryChallanNo?.startsWith('8') ?? false) {
+    return 'Delivery Challan';
   } else {
-    return "Invoice";
+    return 'Invoice';
   }
 }
 

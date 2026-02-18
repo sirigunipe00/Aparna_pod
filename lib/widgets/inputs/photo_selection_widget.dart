@@ -513,9 +513,6 @@ class _PhotoSelectionWidgetState extends State<PhotoSelectionWidget>
 }
 
 class ImagePreviewPage extends StatefulWidget {
-  final String title;
-  final List<File> images;
-  final int initialIndex;
 
   const ImagePreviewPage({
     super.key,
@@ -523,6 +520,9 @@ class ImagePreviewPage extends StatefulWidget {
     required this.initialIndex,
     required this.title,
   });
+  final String title;
+  final List<File> images;
+  final int initialIndex;
 
   @override
   State<ImagePreviewPage> createState() => _ImagePreviewPageState();

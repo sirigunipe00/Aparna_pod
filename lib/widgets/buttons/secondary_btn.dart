@@ -12,7 +12,7 @@ class SecondaryBtn extends StatelessWidget {
   Widget build(BuildContext context) {
     return OutlinedButton.icon(
       style: OutlinedButton.styleFrom(
-        backgroundColor: AppColors.white.withOpacity(0.6),
+        backgroundColor: AppColors.white.withValues(alpha: 0.6),
         visualDensity: VisualDensity.compact,
         side: const BorderSide(color: AppColors.white),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),

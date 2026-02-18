@@ -5,8 +5,8 @@ final _reqisteredUrl = $sl.get<Urls>(instanceName: 'baseUrl');
 class Urls {
   factory Urls.aparnaUAT() =>
       const Urls('http://192.168.3.64/api');
-      factory Urls.local() => const Urls('http://192.168.245.250:8000/api');
-  factory Urls.aparnaLive() => const Urls('https://aparnagmlive.easycloud.co.in/api');
+      factory Urls.local() => const Urls('http://192.168.245.250:8002/api');
+  factory Urls.aparnaLive() => const Urls('http://183.82.45.54/api');
 
 const Urls(this.url);
 
@@ -84,7 +84,7 @@ const Urls(this.url);
 
 
 
-  static filepath(String path) {
+  static String filepath(String path) {
     return '${baseUrl.replaceAll('api', '')}/${path.replaceAll('/private', '').replaceAll("///", '/')}';
   }
 }

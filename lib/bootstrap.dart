@@ -88,9 +88,9 @@ Future<void> bootstrap(void Function() runApp) async {
   await _initInjector();
 
   if (kDebugMode) {
-    await register<Urls>(Urls.aparnaUAT(), instanceName: 'baseUrl');
+    await register<Urls>(Urls.aparnaLive(), instanceName: 'baseUrl');
   } else {
-    await register<Urls>(Urls.aparnaUAT(), instanceName: 'baseUrl');
+    await register<Urls>(Urls.aparnaLive(), instanceName: 'baseUrl');
   }
    await _initFirebase();
 

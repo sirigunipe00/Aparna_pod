@@ -55,7 +55,7 @@ class AparnaApp extends StatelessWidget {
             authenticated: () {
               final filters = Pair(StringUtils.docStatusInt('Draft'), null);
               routerCtxt!
-                ..cubit<GateEntriesCubit>().fetchInitial(filters);
+                .cubit<GateEntriesCubit>().fetchInitial(filters);
               //   ..cubit<GateExitListCubit>().fetchInitial(filters)
               //   ..cubit<IncidentRegistersListCubit>().fetchInitial(filters)
               //   ..cubit<InviteVisitorListCubit>().fetchInitial(filters)
@@ -72,7 +72,7 @@ class AparnaApp extends StatelessWidget {
         },
         builder: (_, state) {
           return MaterialApp.router(
-            title: "Aparna",
+            title: 'Aparna',
             theme: AppMaterialTheme.lightTheme,
             darkTheme: AppMaterialTheme.lightTheme,
             routerConfig: AppRouterConfig.router,

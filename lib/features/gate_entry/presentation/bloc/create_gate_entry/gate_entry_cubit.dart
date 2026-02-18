@@ -41,7 +41,7 @@ class CreateGateEntryCubit extends AppBaseCubit<CreateGateEntryState> {
   }) async {
     final form = state.form;
 
-    print('invoiceNo ....:$invoiceNo');
+
 
     final newForm = form.copyWith(
       plantCode: plantCode ?? form.plantCode,
@@ -54,11 +54,11 @@ class CreateGateEntryCubit extends AppBaseCubit<CreateGateEntryState> {
       docStatus: docStatus ?? form.docStatus,
       remarks: remarks ?? form.remarks,
 
-      // ✅ Replace the entire list
+
       invoiceFiles: invoiceFiles ?? form.invoiceFiles,
     );
 
-    print('newForm.invoiceNo ....:${newForm.invoiceNo}');
+
 
     emitSafeState(state.copyWith(form: newForm));
   }
@@ -95,7 +95,7 @@ class CreateGateEntryCubit extends AppBaseCubit<CreateGateEntryState> {
   void initDetails(Object? entry) {
     shouldAskForConfirmation.value = false;
 
-    // New entry: keep initial state (create mode, isNew = true)
+
     if (entry == null) {
       emitSafeState(CreateGateEntryState.initial());
       return;
@@ -114,7 +114,7 @@ class CreateGateEntryCubit extends AppBaseCubit<CreateGateEntryState> {
         invoiceFiles: entry.invoiceFiles,
       );
 
-      // For an existing entry, mark as not new and switch view to edit/completed
+
       final nextView = (entry.docStatus ?? 0) == 0
           ? GateEntryView.edit
           : GateEntryView.completed;

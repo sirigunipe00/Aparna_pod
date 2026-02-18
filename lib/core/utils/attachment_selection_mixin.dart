@@ -38,7 +38,7 @@ mixin AttahcmentSelectionMixin {
       withData: true,
       withReadStream: true,
       allowMultiple: false,
-      allowedExtensions: <String>["jpg", "png", "jpeg"],
+      allowedExtensions: <String>['jpg', 'png', 'jpeg'],
     );
     if (pickerResult != null && pickerResult.files.isNotEmpty) {
       final file = pickerResult.files.first;

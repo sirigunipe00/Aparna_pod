@@ -63,7 +63,7 @@ abstract class DateFormatUtil {
 
   static String? addTimeOffset(String? time) {
     if (time == null || time.isEmpty) return '';
-    final tempTime = DateFormat("HH:mm:ss").parse(time);
+    final tempTime = DateFormat('HH:mm:ss').parse(time);
     final updatedTime = tempTime.add(const Duration(hours: 5, minutes: 30));
     return DateFormat('HH:mm a').format(updatedTime);
   }

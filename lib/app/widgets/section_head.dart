@@ -55,7 +55,7 @@ class SectionHead extends StatelessWidget {
                   Icons.camera_alt_rounded,
                   color: AppColors.marigoldDDust,
                 ),
-                tooltip: "Capture Invoice Image",
+                tooltip: 'Capture Invoice Image',
                 onPressed: onCameraPressed,
               ),
           ],

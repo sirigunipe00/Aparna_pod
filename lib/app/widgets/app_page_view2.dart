@@ -139,7 +139,7 @@ class AppPageView2<T extends PageViewFiltersCubit> extends StatelessWidget {
                 border: Border.all(color: AppColors.white),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.black.withOpacity(0.5),
+                    color: AppColors.black.withValues(alpha: 0.5),
                     blurRadius: 10,
                     offset: const Offset(0, -1),
                   )
@@ -161,7 +161,7 @@ class AppPageView2<T extends PageViewFiltersCubit> extends StatelessWidget {
           color: AppColors.white,
         ),
         label: Text(
-          "New",
+          'New',
           style: AppTextStyles.titleLarge(context)
               .copyWith(color: AppColors.white, fontSize: 22),
         ),

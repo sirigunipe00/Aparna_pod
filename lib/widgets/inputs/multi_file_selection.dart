@@ -135,7 +135,7 @@ class _MultiFileSelectionWidgetState extends State<MultiFileSelectionWidget>
         return AlertDialog(
           backgroundColor: AppColors.white,
           surfaceTintColor: AppColors.white,
-          title: const Text("Invoice Images"),
+          title: const Text('Invoice Images'),
           content: _InvoiceImagesListView(
             files: _selectedImages, 
             urls: widget.initialValue, 
@@ -213,7 +213,7 @@ class __InvoiceImagesListViewState extends State<_InvoiceImagesListView> {
             decoration: BoxDecoration(
               color: AppColors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.grey.withOpacity(0.3)),
+              border: Border.all(color: AppColors.grey.withValues(alpha: 0.3)),
               boxShadow: const [
                 BoxShadow(
                   color: Colors.black26,

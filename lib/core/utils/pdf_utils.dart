@@ -440,7 +440,7 @@ class PdfUtils {
     List<File> images, {
     String fileNamePrefix = 'document',
   }) async {
-    if (images.isEmpty) throw Exception("No images selected");
+    if (images.isEmpty) throw Exception('No images selected');
 
     final pdf = pw.Document();
 
