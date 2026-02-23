@@ -104,8 +104,8 @@ class GateEntryRepoImpl extends BaseApiRepository implements GateEntryRepo {
     final payload = {
       'plant_code': form.plantCode,
       'invoice_date': formattedDate,
-      'sap_no': form.deliveryChallanNo != null ? null : form.sapNo,
-      'invoice_no': form.deliveryChallanNo != null ? null : form.invoiceNo,
+      'sap_no': form.sapNo,
+      'invoice_no':form.invoiceNo,
       'delivery_challan_no': form.deliveryChallanNo,
       'files': filesList,
       'remarks': form.remarks,

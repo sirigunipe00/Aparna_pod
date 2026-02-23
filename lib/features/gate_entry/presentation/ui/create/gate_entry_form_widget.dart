@@ -275,7 +275,7 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
 
                 return InputField(
                   readOnly: true,
-                  key: UniqueKey(),
+                  // key: UniqueKey(),
                   controller: sapNoController,
                   initialValue: form.sapNo,
                   title: 'SAP No',
@@ -618,7 +618,10 @@ if (tenDigitNumbers.isNotEmpty) {
   final plantCode = (invoiceNo != null && invoiceNo.length >= 4)
         ? invoiceNo.substring(0, 4)
         : null;
-
+sapNoController.text = sapNo ?? '';
+invoiceNoController.text = invoiceNo ?? '';
+plantCodeController.text = plantCode ?? '';
+invoiceDateController.text = extractedDate ?? '';
 
     cubit.onValueChanged(
       invoiceNo: invoiceNo,

@@ -231,6 +231,7 @@ class _PhotoSelectionWidgetState extends State<PhotoSelectionWidget>
       } catch (_) {}
 
       // Add each scanned page
+      await compute(_fixImageInBackground, path);
       await _processSelectedFile(scannedFile);
     }
 
@@ -510,6 +511,25 @@ class _PhotoSelectionWidgetState extends State<PhotoSelectionWidget>
       ),
     );
   }
+
+
+}
+Future<void> _fixImageInBackground(String filePath) async {
+  final file = File(filePath);
+  final bytes = await file.readAsBytes();
+  
+  // Decode the image
+  final image = img.decodeImage(bytes);
+  if (image == null) return;
+
+  // Bake orientation (fixes sideways photos)
+  final fixedImage = img.bakeOrientation(image);
+
+  // Re-encode with 80% quality to save massive amounts of memory/disk space
+  // 100% quality is usually unnecessary for OCR and causes huge memory spikes
+  final compressedBytes = img.encodeJpg(fixedImage, quality: 80);
+  
+  await file.writeAsBytes(compressedBytes, flush: true);
 }
 
 class ImagePreviewPage extends StatefulWidget {
