@@ -350,7 +350,6 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
 //     }
 //   }
 
-
 //   lines.sort((a, b) {
 //     final yDiff = (a.top - b.top).abs();
 //     if (yDiff < 12) {
@@ -360,10 +359,8 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
 //     return a.top.compareTo(b.top);
 //   });
 
-
 //   return lines.map((e) => e.text).join('\n');
 // }
-
 
   // Future<void> extractTextFromImage(String imagePath) async {
   //   final inputImage = InputImage.fromFilePath(imagePath);
@@ -437,7 +434,6 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
   //           (deliveryChallan != null && deliveryChallan.length >= 4)
   //               ? deliveryChallan.substring(0, 4)
   //               : null;
-        
 
   //       cubit.onValueChanged(
   //         deliveryChallanNo: deliveryChallan,
@@ -451,28 +447,22 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
   //     }
   //   });
 
-
-    
-
   //   final tenDigitNumbers =
   //       getAllTenDigitNumbers(fullText, excludeHighStart: true);
 
   //   final invoiceNo = tenDigitNumbers.isNotEmpty ? tenDigitNumbers.first : null;
-    
 
   //   String? plantCode;
   //   String? sapNo;
 
   //   if (invoiceNo != null && invoiceNo.length >= 4) {
   //     plantCode = invoiceNo.substring(0, 4);
-  //     sapNo = plantCode; 
+  //     sapNo = plantCode;
   //   }
-
-
 
   //   cubit.onValueChanged(
   //     invoiceNo: invoiceNo,
-  //     sapNo: sapNo, 
+  //     sapNo: sapNo,
   //     invoiceDate: extractedDate,
   //     deliveryChallanNo: null,
   //     plantCode: plantCode,
@@ -489,7 +479,6 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
 
 // ... rest of the file
 
-
   Future<void> extractTextFromImage(String imagePath) async {
     final inputImage = InputImage.fromFilePath(imagePath);
     final textRecognizer = TextRecognizer();
@@ -497,9 +486,6 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
     final recognizedText = await textRecognizer.processImage(inputImage);
     final fullText = recognizedText.text;
     // final fullText = extractRowWiseText(recognizedText);
-
-   
-
 
     debugPrint('📝 Extracted Text:\n$fullText');
 
@@ -559,23 +545,22 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
     debugPrint('📌 Selected Invoice Date: $extractedDate');
 
     // setState(() {
-      if (docType == DocumentType.deliveryChallan) {
-        final deliveryChallan = extractDeliveryChallanNo(fullText);
-        final plantCode =
-            (deliveryChallan != null && deliveryChallan.length >= 4)
-                ? deliveryChallan.substring(0, 4)
-                : null;
+    if (docType == DocumentType.deliveryChallan) {
+      final deliveryChallan = extractDeliveryChallanNo(fullText);
+      final plantCode = (deliveryChallan != null && deliveryChallan.length >= 4)
+          ? deliveryChallan.substring(0, 4)
+          : null;
 
-        cubit.onValueChanged(
-          deliveryChallanNo: deliveryChallan,
-          invoiceDate: extractedDate,
-          invoiceNo: null,
-          plantCode: plantCode,
-          sapNo: null,
-        );
-        debugPrint('✅ Delivery Challan processed');
-        return;
-      }
+      cubit.onValueChanged(
+        deliveryChallanNo: deliveryChallan,
+        invoiceDate: extractedDate,
+        invoiceNo: null,
+        plantCode: plantCode,
+        sapNo: null,
+      );
+      debugPrint('✅ Delivery Challan processed');
+      return;
+    }
     // });
 
     // final tenDigitNumbers =
@@ -587,50 +572,116 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
     // final plantCode = (invoiceNo != null && invoiceNo.length >= 4)
     //     ? invoiceNo.substring(0, 4)
     //     : null;
-    final tenDigitNumbers =
-    getAllTenDigitNumbers(fullText, excludeHighStart: true);
+//     final tenDigitNumbers =
+//         getAllTenDigitNumbers(fullText, excludeHighStart: true);
+
+//     String? invoiceNo;
+//     String? sapNo;
+//     if (tenDigitNumbers.isNotEmpty) {
+//       invoiceNo = tenDigitNumbers.first;
+
+//       final invoicePrefix = invoiceNo.substring(0, 4);
+
+//       final possibleSap = tenDigitNumbers.where(
+//         (num) => num != invoiceNo && num.startsWith(invoicePrefix),
+//       );
+
+//       sapNo = possibleSap.isNotEmpty ? possibleSap.first : null;
+//     }
+
+// // if (tenDigitNumbers.isNotEmpty) {
+// //   invoiceNo = tenDigitNumbers.first;
+
+// //   final invoicePrefix = invoiceNo.substring(0, 4);
+
+// //   sapNo = tenDigitNumbers.firstWhere(
+// //     (num) => num != invoiceNo && num.startsWith(invoicePrefix),
+
+// //   );
+// // }
+//     final plantCode = (invoiceNo != null && invoiceNo.length >= 4)
+//         ? invoiceNo.substring(0, 4)
+//         : null;
+//     sapNoController.text = sapNo ?? '';
+//     invoiceNoController.text = invoiceNo ?? '';
+//     plantCodeController.text = plantCode ?? '';
+//     invoiceDateController.text = extractedDate ?? '';
+
+//     cubit.onValueChanged(
+//       invoiceNo: invoiceNo,
+//       sapNo: sapNo,
+//       invoiceDate: extractedDate,
+//       deliveryChallanNo: null,
+//       plantCode: plantCode,
+//     );
+final tenDigitNumbers = getAllTenDigitNumbers(fullText, excludeHighStart: true);
+
+// Separately extract 12-digit invoice numbers (like 261225000261)
+final twelveDigitRegex = RegExp(r'\b\d{12}\b');
+final twelveDigitNumbers = twelveDigitRegex
+    .allMatches(fullText)
+    .map((m) => m.group(0)!)
+    .toList();
+
+debugPrint('🔢 10-digit numbers: $tenDigitNumbers');
+debugPrint('🔢 12-digit numbers: $twelveDigitNumbers');
 
 String? invoiceNo;
 String? sapNo;
-if (tenDigitNumbers.isNotEmpty) {
-  invoiceNo = tenDigitNumbers.first;
+String? plantCode;
 
-  final invoicePrefix = invoiceNo.substring(0, 4);
+if (twelveDigitNumbers.isNotEmpty) {
+  // Invoice No is the 12-digit number e.g. "261225000261"
+  invoiceNo = twelveDigitNumbers.first;
 
+  // Remove first 2 digits: "261225000261" -> "1225000261"
+  final trimmedInvoice = invoiceNo.substring(2);
+
+  // Take first 4 of trimmed: "1225"
+  final sapMatchPrefix = trimmedInvoice.substring(0, 4);
+
+  debugPrint('🔎 Invoice: $invoiceNo | Trimmed: $trimmedInvoice | SAP prefix: $sapMatchPrefix');
+
+  // SAP No is 10-digit number starting with "1225"
   final possibleSap = tenDigitNumbers.where(
-    (num) => num != invoiceNo && num.startsWith(invoicePrefix),
+    (num) => num.startsWith(sapMatchPrefix),
   );
 
   sapNo = possibleSap.isNotEmpty ? possibleSap.first : null;
+  plantCode = sapMatchPrefix; // "1225"
+
+} else if (tenDigitNumbers.isNotEmpty) {
+  // Fallback: if no 12-digit found, use old logic
+  invoiceNo = tenDigitNumbers.first;
+  final trimmedInvoice = invoiceNo.length > 2 ? invoiceNo.substring(2) : invoiceNo;
+  final sapMatchPrefix = trimmedInvoice.length >= 4 ? trimmedInvoice.substring(0, 4) : trimmedInvoice;
+  
+  final possibleSap = tenDigitNumbers.where(
+    (num) => num != invoiceNo && num.startsWith(sapMatchPrefix),
+  );
+  
+  sapNo = possibleSap.isNotEmpty ? possibleSap.first : null;
+  plantCode = sapMatchPrefix;
 }
 
-// if (tenDigitNumbers.isNotEmpty) {
-//   invoiceNo = tenDigitNumbers.first;
-
-//   final invoicePrefix = invoiceNo.substring(0, 4);
-
-
-//   sapNo = tenDigitNumbers.firstWhere(
-//     (num) => num != invoiceNo && num.startsWith(invoicePrefix),
-  
-//   );
-// }
-  final plantCode = (invoiceNo != null && invoiceNo.length >= 4)
-        ? invoiceNo.substring(0, 4)
-        : null;
 sapNoController.text = sapNo ?? '';
 invoiceNoController.text = invoiceNo ?? '';
 plantCodeController.text = plantCode ?? '';
 invoiceDateController.text = extractedDate ?? '';
 
-    cubit.onValueChanged(
-      invoiceNo: invoiceNo,
-      sapNo: sapNo,
-      invoiceDate: extractedDate,
-      deliveryChallanNo: null,
-      plantCode: plantCode,
-    );
+cubit.onValueChanged(
+  invoiceNo: invoiceNo,     // "261225000261" ✅
+  sapNo: sapNo,             // "1225056104" ✅
+  invoiceDate: extractedDate,
+  deliveryChallanNo: null,
+  plantCode: plantCode,     // "1225" ✅
+);
 
+debugPrint('🧾 Invoice processed');
+debugPrint('📄 Invoice No: $invoiceNo');
+debugPrint('🔍 SAP No: $sapNo');
+debugPrint('📅 Date: $extractedDate');
+debugPrint('🏷️ Plant Code: $plantCode');
     debugPrint('🧾 Invoice processed');
     debugPrint('📄 Invoice No: $invoiceNo');
     debugPrint('🔍 SAP No: $sapNo');
@@ -639,6 +690,4 @@ invoiceDateController.text = extractedDate ?? '';
 
     return;
   }
-  
-  
 }

@@ -5,7 +5,7 @@ final _reqisteredUrl = $sl.get<Urls>(instanceName: 'baseUrl');
 class Urls {
   factory Urls.aparnaUAT() =>
       const Urls('http://192.168.3.64/api');
-      factory Urls.local() => const Urls('http://192.168.245.250:8002/api');
+      factory Urls.local() => const Urls('https://unroused-wade-genically.ngrok-free.dev/api');
   factory Urls.aparnaLive() => const Urls('http://183.82.45.54/api');
 
 const Urls(this.url);
