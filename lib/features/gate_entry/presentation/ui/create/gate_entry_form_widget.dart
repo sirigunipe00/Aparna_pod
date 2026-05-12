@@ -104,31 +104,7 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
                   defaultValue: files,
                   title: 'Invoice Photos',
                   isReadOnly: !state.isNew,
-                  // onReCrop: (oldFile, newFile) async {
-                  //   final updatedList = [...?state.form.invoiceFiles];
-                  //   updatedList.remove(oldFile);
-
-                  //   final updatedFile = File(newFile.path);
-                  //   updatedList.add(updatedFile);
-
-                  //   lastCroppedPath = updatedFile.path;
-
-                  //   await extractTextFromImage(updatedFile.path);
-
-                  //   context
-                  //       .cubit<CreateGateEntryCubit>()
-                  //       .onValueChanged(invoiceFiles: updatedList);
-                  // },
-                  // onFileCapture: (capturedFiles) {
-                  //   if (!state.isNew) return;
-                  //   context
-                  //       .cubit<CreateGateEntryCubit>()
-                  //       .onValueChanged(invoiceFiles: capturedFiles);
-                  //   for (final f in capturedFiles) {
-                  //     extractTextFromImage(f.path);
-                  //   }
-                  // },
-                  onFileCapture: (capturedFiles) {
+                  onFileCapture: (capturedFiles) async {
                     if (!state.isNew) return;
 
                     final cubit = context.cubit<CreateGateEntryCubit>();
@@ -153,8 +129,10 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
 
                       debugPrint('🗑️ Images removed. Form data cleared.');
                     } else {
+                      // Process images one by one; stop as soon as one succeeds
                       for (final f in updatedList) {
-                        extractTextFromImage(f.path);
+                        final success = await extractTextFromImage(f.path);
+                        if (success) break;
                       }
                     }
                   },
@@ -479,7 +457,7 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
 
 // ... rest of the file
 
-  Future<void> extractTextFromImage(String imagePath) async {
+  Future<bool> extractTextFromImage(String imagePath) async {
     final inputImage = InputImage.fromFilePath(imagePath);
     final textRecognizer = TextRecognizer();
 
@@ -506,16 +484,75 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
 
       return dates;
     }
-
     String? selectInvoiceDate(List<String> dates) {
-      if (dates.isEmpty) return null;
+  if (dates.isEmpty) return null;
 
-      if (dates.length == 1) {
-        return dates.first;
+  final now = DateTime.now();
+
+  // Financial year logic
+  // Example:
+  // Apr 2025 - Mar 2026
+  final fyStartYear = now.month >= 4 ? now.year : now.year - 1;
+  final fyEndYear = fyStartYear + 1;
+
+  DateTime? validDate;
+
+  for (final rawDate in dates) {
+    try {
+      // Normalize separators
+      final cleaned = rawDate.replaceAll(RegExp(r'[^0-9]'), '/');
+
+      final parts = cleaned.split('/');
+
+      if (parts.length != 3) continue;
+
+      final day = int.tryParse(parts[0]);
+      final month = int.tryParse(parts[1]);
+      final year = int.tryParse(parts[2]);
+
+      if (day == null || month == null || year == null) continue;
+
+      // Reject impossible OCR years
+      if (year < fyStartYear || year > fyEndYear) {
+        debugPrint('❌ Rejected invalid OCR year: $year');
+        continue;
       }
 
-      return dates[1];
+      // Basic validation
+      if (month < 1 || month > 12) continue;
+      if (day < 1 || day > 31) continue;
+
+      final parsed = DateTime(year, month, day);
+
+      
+      if (parsed.isAfter(now)) {
+        debugPrint('❌ Future date rejected: $parsed');
+        continue;
+      }
+
+      validDate = parsed;
+      break;
+    } catch (_) {
+      continue;
     }
+  }
+
+  if (validDate == null) return null;
+
+  return "${validDate.day.toString().padLeft(2, '0')}."
+       "${validDate.month.toString().padLeft(2, '0')}."
+       "${validDate.year}";
+}
+
+    // String? selectInvoiceDate(List<String> dates) {
+    //   if (dates.isEmpty) return null;
+
+    //   if (dates.length == 1) {
+    //     return dates.first;
+    //   }
+
+    //   return dates[1];
+    // }
 
     String? extractDeliveryChallanNo(String text) {
       final regex = RegExp(
@@ -544,7 +581,6 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
     final extractedDate = selectInvoiceDate(allDates);
     debugPrint('📌 Selected Invoice Date: $extractedDate');
 
-    // setState(() {
     if (docType == DocumentType.deliveryChallan) {
       final deliveryChallan = extractDeliveryChallanNo(fullText);
       final plantCode = (deliveryChallan != null && deliveryChallan.length >= 4)
@@ -559,135 +595,70 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
         sapNo: null,
       );
       debugPrint('✅ Delivery Challan processed');
-      return;
+      return true; // success — stop processing more images
     }
-    // });
 
-    // final tenDigitNumbers =
-    //     getAllTenDigitNumbers(fullText, excludeHighStart: true);
+    final tenDigitNumbers = getAllTenDigitNumbers(fullText, excludeHighStart: true);
 
-    // final invoiceNo = tenDigitNumbers.isNotEmpty ? tenDigitNumbers.first : null;
-    // final sapNo = tenDigitNumbers.length > 1 ? tenDigitNumbers[1] : null;
+    final twelveDigitRegex = RegExp(r'\b\d{12}\b');
+    final twelveDigitNumbers = twelveDigitRegex
+        .allMatches(fullText)
+        .map((m) => m.group(0)!)
+        .toList();
 
-    // final plantCode = (invoiceNo != null && invoiceNo.length >= 4)
-    //     ? invoiceNo.substring(0, 4)
-    //     : null;
-//     final tenDigitNumbers =
-//         getAllTenDigitNumbers(fullText, excludeHighStart: true);
+    debugPrint('🔢 10-digit numbers: $tenDigitNumbers');
+    debugPrint('🔢 12-digit numbers: $twelveDigitNumbers');
 
-//     String? invoiceNo;
-//     String? sapNo;
-//     if (tenDigitNumbers.isNotEmpty) {
-//       invoiceNo = tenDigitNumbers.first;
+    String? invoiceNo;
+    String? sapNo;
+    String? plantCode;
 
-//       final invoicePrefix = invoiceNo.substring(0, 4);
+    if (twelveDigitNumbers.isNotEmpty) {
+      invoiceNo = twelveDigitNumbers.first;
+      final trimmedInvoice = invoiceNo.substring(2);
+      final sapMatchPrefix = trimmedInvoice.substring(0, 4);
+      debugPrint('🔎 Invoice: $invoiceNo | Trimmed: $trimmedInvoice | SAP prefix: $sapMatchPrefix');
+      final possibleSap = tenDigitNumbers.where(
+        (num) => num.startsWith(sapMatchPrefix),
+      );
+      sapNo = possibleSap.isNotEmpty ? possibleSap.first : null;
+      plantCode = sapMatchPrefix;
+    } else if (tenDigitNumbers.isNotEmpty) {
+      invoiceNo = tenDigitNumbers.first;
+      final trimmedInvoice = invoiceNo.length > 2 ? invoiceNo.substring(2) : invoiceNo;
+      final sapMatchPrefix = trimmedInvoice.length >= 4 ? trimmedInvoice.substring(0, 4) : trimmedInvoice;
+      final possibleSap = tenDigitNumbers.where(
+        (num) => num != invoiceNo && num.startsWith(sapMatchPrefix),
+      );
+      sapNo = possibleSap.isNotEmpty ? possibleSap.first : null;
+      plantCode = sapMatchPrefix;
+    }
 
-//       final possibleSap = tenDigitNumbers.where(
-//         (num) => num != invoiceNo && num.startsWith(invoicePrefix),
-//       );
+    // Nothing useful extracted — try the next image
+    if (invoiceNo == null && extractedDate == null) {
+      debugPrint('⚠️ Nothing extracted from this image, trying next...');
+      return false;
+    }
 
-//       sapNo = possibleSap.isNotEmpty ? possibleSap.first : null;
-//     }
+    sapNoController.text = sapNo ?? '';
+    invoiceNoController.text = invoiceNo ?? '';
+    plantCodeController.text = plantCode ?? '';
+    invoiceDateController.text = extractedDate ?? '';
 
-// // if (tenDigitNumbers.isNotEmpty) {
-// //   invoiceNo = tenDigitNumbers.first;
+    cubit.onValueChanged(
+      invoiceNo: invoiceNo,
+      sapNo: sapNo,
+      invoiceDate: extractedDate,
+      deliveryChallanNo: null,
+      plantCode: plantCode,
+    );
 
-// //   final invoicePrefix = invoiceNo.substring(0, 4);
-
-// //   sapNo = tenDigitNumbers.firstWhere(
-// //     (num) => num != invoiceNo && num.startsWith(invoicePrefix),
-
-// //   );
-// // }
-//     final plantCode = (invoiceNo != null && invoiceNo.length >= 4)
-//         ? invoiceNo.substring(0, 4)
-//         : null;
-//     sapNoController.text = sapNo ?? '';
-//     invoiceNoController.text = invoiceNo ?? '';
-//     plantCodeController.text = plantCode ?? '';
-//     invoiceDateController.text = extractedDate ?? '';
-
-//     cubit.onValueChanged(
-//       invoiceNo: invoiceNo,
-//       sapNo: sapNo,
-//       invoiceDate: extractedDate,
-//       deliveryChallanNo: null,
-//       plantCode: plantCode,
-//     );
-final tenDigitNumbers = getAllTenDigitNumbers(fullText, excludeHighStart: true);
-
-// Separately extract 12-digit invoice numbers (like 261225000261)
-final twelveDigitRegex = RegExp(r'\b\d{12}\b');
-final twelveDigitNumbers = twelveDigitRegex
-    .allMatches(fullText)
-    .map((m) => m.group(0)!)
-    .toList();
-
-debugPrint('🔢 10-digit numbers: $tenDigitNumbers');
-debugPrint('🔢 12-digit numbers: $twelveDigitNumbers');
-
-String? invoiceNo;
-String? sapNo;
-String? plantCode;
-
-if (twelveDigitNumbers.isNotEmpty) {
-  // Invoice No is the 12-digit number e.g. "261225000261"
-  invoiceNo = twelveDigitNumbers.first;
-
-  // Remove first 2 digits: "261225000261" -> "1225000261"
-  final trimmedInvoice = invoiceNo.substring(2);
-
-  // Take first 4 of trimmed: "1225"
-  final sapMatchPrefix = trimmedInvoice.substring(0, 4);
-
-  debugPrint('🔎 Invoice: $invoiceNo | Trimmed: $trimmedInvoice | SAP prefix: $sapMatchPrefix');
-
-  // SAP No is 10-digit number starting with "1225"
-  final possibleSap = tenDigitNumbers.where(
-    (num) => num.startsWith(sapMatchPrefix),
-  );
-
-  sapNo = possibleSap.isNotEmpty ? possibleSap.first : null;
-  plantCode = sapMatchPrefix; // "1225"
-
-} else if (tenDigitNumbers.isNotEmpty) {
-  // Fallback: if no 12-digit found, use old logic
-  invoiceNo = tenDigitNumbers.first;
-  final trimmedInvoice = invoiceNo.length > 2 ? invoiceNo.substring(2) : invoiceNo;
-  final sapMatchPrefix = trimmedInvoice.length >= 4 ? trimmedInvoice.substring(0, 4) : trimmedInvoice;
-  
-  final possibleSap = tenDigitNumbers.where(
-    (num) => num != invoiceNo && num.startsWith(sapMatchPrefix),
-  );
-  
-  sapNo = possibleSap.isNotEmpty ? possibleSap.first : null;
-  plantCode = sapMatchPrefix;
-}
-
-sapNoController.text = sapNo ?? '';
-invoiceNoController.text = invoiceNo ?? '';
-plantCodeController.text = plantCode ?? '';
-invoiceDateController.text = extractedDate ?? '';
-
-cubit.onValueChanged(
-  invoiceNo: invoiceNo,     // "261225000261" ✅
-  sapNo: sapNo,             // "1225056104" ✅
-  invoiceDate: extractedDate,
-  deliveryChallanNo: null,
-  plantCode: plantCode,     // "1225" ✅
-);
-
-debugPrint('🧾 Invoice processed');
-debugPrint('📄 Invoice No: $invoiceNo');
-debugPrint('🔍 SAP No: $sapNo');
-debugPrint('📅 Date: $extractedDate');
-debugPrint('🏷️ Plant Code: $plantCode');
     debugPrint('🧾 Invoice processed');
     debugPrint('📄 Invoice No: $invoiceNo');
     debugPrint('🔍 SAP No: $sapNo');
     debugPrint('📅 Date: $extractedDate');
     debugPrint('🏷️ Plant Code: $plantCode');
 
-    return;
+    return true; // success — stop processing more images
   }
 }
