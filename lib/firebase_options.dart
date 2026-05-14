@@ -64,7 +64,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '341004248380',
     projectId: 'aparnapod-f77a7',
     storageBucket: 'aparnapod-f77a7.firebasestorage.app',
-    iosBundleId: 'com.example.aparnaPod',
+    iosBundleId: 'in.easycloud.aparnaPod',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -73,7 +73,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '341004248380',
     projectId: 'aparnapod-f77a7',
     storageBucket: 'aparnapod-f77a7.firebasestorage.app',
-    iosBundleId: 'com.example.aparnaPod',
+    iosBundleId: 'in.easycloud.aparnaPod',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

@@ -25,21 +25,9 @@ class _NewGateEntryState extends State<NewGateEntry> {
     final gateEntryState = context.watch<CreateGateEntryCubit>().state;
     final newform = gateEntryState.form;
     final status = newform.docStatus;
-    // final name = newform.name;
     final isNew = gateEntryState.isNew;
-
-    // final isNew = gateEntryState.view == GateEntryView.create;
     return Scaffold(
       backgroundColor: AppColors.white,
-      // appBar: isNew
-      //     ? const SimpleAppBar(title: 'Proof Of Delivery')
-      //     : TitleStatusAppBar(
-      //         title: ' of Delivery',
-      //          docNo: name.valueOrEmpty,
-      //         status: StringUtils.docStatus(status ?? 0),
-      //         textColor: AppColors.marigoldDDust,
-      //       )
-      // as PreferredSizeWidget,
       appBar: isNew
     ? const SimpleAppBar(title: 'Proof Of Delivery')
     : const TitleStatusAppBar(
@@ -47,7 +35,6 @@ class _NewGateEntryState extends State<NewGateEntry> {
         docNo: '',
         status: 'Submitted', textColor: AppColors.marigoldDDust,
       ),
-
       body: BlocListener<CreateGateEntryCubit, CreateGateEntryState>(
         listener: (_, state) async {
           if (state.isSuccess && state.successMsg!.isNotNull) {

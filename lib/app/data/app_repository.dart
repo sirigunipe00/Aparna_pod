@@ -19,20 +19,14 @@ class AppRepository extends BaseApiRepository {
       parser: (p0) => p0,
     );
     final response = await post(requestConfig, includeAuthHeader: false);
-
     return await response.processAsync((r) async {
       final responseData = r.data!;
       final data = responseData['data'];
-
-      if (data['status'] == 400) {
+       if (data['status'] == 400) {
         return left(Failure(error: data['message']));
       }
       final serverVersion = data['app_version'];
       final appVersionStr = await appVersion.getAppVersion();
-      print('serverVersion$serverVersion');
-      print('appVersionStr$appVersionStr');
-
-
       if (appVersionStr.compareTo(serverVersion) < 0) {
         return right(true);
       }

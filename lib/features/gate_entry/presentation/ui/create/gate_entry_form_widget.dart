@@ -52,11 +52,30 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
   final focusNodes = List.generate(40, (index) => FocusNode());
   @override
   Widget build(BuildContext context) {
+
+    final loggedInUser = context.user;
+    print('loggedInUser$loggedInUser');
+
+final isSuperUser =
+    loggedInUser.roleProfile?.contains('POD Invoice Super User') ?? false;
+    print('............$isSuperUser');
     final formState = context.watch<CreateGateEntryCubit>().state;
     final isCompleted = formState.view == GateEntryView.completed;
     final newform = formState.form;
 
     $logger.devLog('form..............$newform');
+    final now = DateTime.now();
+
+final financialYearStart =
+    now.month >= 4
+        ? DateTime(now.year, 4, 1)
+        : DateTime(now.year - 1, 4, 1);
+
+final financialYearEnd =
+    now.month >= 4
+        ? DateTime(now.year + 1, 3, 31)
+        : DateTime(now.year, 3, 31);
+        
 
     return MultiBlocListener(
       listeners: [
@@ -143,8 +162,8 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
             BlocBuilder<CreateGateEntryCubit, CreateGateEntryState>(
               builder: (context, state) {
                 return InputField(
-                  readOnly: true,
-                  key: UniqueKey(),
+                  readOnly: !isSuperUser,
+                  // key: UniqueKey(),
                   controller: plantCodeController,
                   initialValue: newform.plantCode,
                   title: 'Plant Code',
@@ -169,8 +188,8 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
                 }
 
                 return InputField(
-                  readOnly: true,
-                  key: UniqueKey(),
+                  readOnly: !isSuperUser,
+                  // key: UniqueKey(),
                   controller: invoiceNoController,
                   initialValue: form.invoiceNo,
                   title: 'Invoice No',
@@ -196,8 +215,8 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
                 }
 
                 return InputField(
-                  readOnly: true,
-                  key: UniqueKey(),
+                  readOnly: !isSuperUser,
+                  // key: UniqueKey(),
                   controller: deliveryChallanController,
                   initialValue: newform.deliveryChallanNo,
                   title: 'Delivery Challan Number',
@@ -217,10 +236,13 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
             //       //  buildWhen: (previous, current) => previous != current,
             //   builder: (context, state) {
             //     return
-            InputField(
-              readOnly: true,
+            DateSelectionField(
+              
+              firstDate: financialYearStart,
+              lastDate: financialYearEnd ,
+              readOnly: !isSuperUser,
               // key: UniqueKey(),
-              controller: invoiceDateController,
+              // controller: invoiceDateController,
               key: ValueKey(newform.invoiceDate),
 
               initialValue: (() {
@@ -229,11 +251,16 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
                 final parsed = DateTime.tryParse(dateStr);
                 return parsed != null ? DFU.ddMMyyyy(parsed) : dateStr;
               })(),
-              onChanged: (p0) {
+              
+              onDateSelect: (p0) {
+                 final formattedDate =
+      "${p0.day.toString().padLeft(2, '0')}."
+      "${p0.month.toString().padLeft(2, '0')}."
+      "${p0.year}";
                 // setState(() {
                 context
                     .cubit<CreateGateEntryCubit>()
-                    .onValueChanged(invoiceDate: p0);
+                    .onValueChanged(invoiceDate: formattedDate);
                 // });
               },
               title: 'Invoice Date',
@@ -252,7 +279,7 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
                 }
 
                 return InputField(
-                  readOnly: true,
+                 readOnly: !isSuperUser,
                   // key: UniqueKey(),
                   controller: sapNoController,
                   initialValue: form.sapNo,
@@ -465,7 +492,7 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
     final fullText = recognizedText.text;
     // final fullText = extractRowWiseText(recognizedText);
 
-    debugPrint('📝 Extracted Text:\n$fullText');
+    // debugPrint('📝 Extracted Text:\n$fullText');
 
     final docType = detectDocumentType(fullText);
 
@@ -658,7 +685,7 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
     debugPrint('🔍 SAP No: $sapNo');
     debugPrint('📅 Date: $extractedDate');
     debugPrint('🏷️ Plant Code: $plantCode');
-
+// await textRecognizer.close();
     return true; // success — stop processing more images
   }
 }

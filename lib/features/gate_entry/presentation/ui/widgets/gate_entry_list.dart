@@ -20,7 +20,6 @@ class GateEntryListScrn extends StatelessWidget {
       mode: PageMode2.gateentry,
       scaffoldBg: AppIcons.bgFrame1.path,
       backgroundColor: AppColors.marigoldDDust,
-      // onNew: () => AppRoute.newGateEntry.push(context),
       onNew: () async {
         final refresh = await AppRoute.newGateEntry.push<bool>(context);
         if(!context.mounted) return;

@@ -20,6 +20,8 @@ class LoggedInUser with _$LoggedInUser {
     @JsonKey(name: 'birth_date') String? bithDate,
     String? phone,
     String? location,
+    @JsonKey(name: 'role_profile', defaultValue: [])
+    List<String>? roleProfile,
     String? bio,
     @JsonKey(name: 'mobile_no') String? mobileNo,
   }) = _LoggedInUser;

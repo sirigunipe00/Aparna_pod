@@ -32,13 +32,13 @@ class GateEntryWidget extends StatelessWidget {
             margin: const EdgeInsets.all(12),
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row( mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(gateEntry.sapNo!,
                       style: AppTextStyles.titleLarge(context)
                           .copyWith(color: AppColors.black)),
                   Text(DFU.ddMMyyyyFromStr(gateEntry.creation ?? ''),
-                  
                       style: AppTextStyles.titleLarge(context)
                           .copyWith(color: AppColors.black)),
                 ],
@@ -49,26 +49,23 @@ class GateEntryWidget extends StatelessWidget {
                 children: [
                   ViewBtn(onPressed: onTap),
                   Text(
-  getFormType(gateEntry),
-  style: AppTextStyles.titleLarge(context)
-      .copyWith(color: AppColors.black),
-),
+                    getFormType(gateEntry),
+                    style: AppTextStyles.titleLarge(context)
+                        .copyWith(color: AppColors.black),
+                  ),
 
-                  // DocStatusWidget(
-                  //     status: StringUtils.docStatus(gateEntry.!))
                 ],
               ),
             ],
           )),
     );
   }
+
   String getFormType(PodUploadForm form) {
-
-  if (form.deliveryChallanNo?.startsWith('8') ?? false) {
-    return 'Delivery Challan';
-  } else {
-    return 'Invoice';
+    if (form.deliveryChallanNo?.startsWith('8') ?? false) {
+      return 'Delivery Challan';
+    } else {
+      return 'Invoice';
+    }
   }
-}
-
 }

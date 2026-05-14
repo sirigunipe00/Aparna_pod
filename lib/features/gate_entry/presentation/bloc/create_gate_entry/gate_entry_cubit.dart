@@ -40,67 +40,26 @@ class CreateGateEntryCubit extends AppBaseCubit<CreateGateEntryState> {
     String? remarks,
   }) async {
     final form = state.form;
-
-
-
     final newForm = form.copyWith(
       plantCode: plantCode ?? form.plantCode,
       invoiceNo: invoiceNo ?? form.invoiceNo, 
       sapNo: sapNo ?? form.sapNo,
       invoiceDate: invoiceDate ?? form.invoiceDate,
       deliveryChallanNo: deliveryChallanNo ?? form.deliveryChallanNo,
-
       creation: creation ?? form.creation,
       docStatus: docStatus ?? form.docStatus,
       remarks: remarks ?? form.remarks,
-
-
       invoiceFiles: invoiceFiles ?? form.invoiceFiles,
     );
-
-
-
     emitSafeState(state.copyWith(form: newForm));
   }
 
-  // void onValueChanged({
-  //   String? plantCode,
-  //   String? invoiceNo,
-  //   String? invoiceDate,
-  //   String? filename,
-  //   String? sapNo,
-
-  //   List<File>? invoiceFiles,
-  // }) async {
-  //   shouldAskForConfirmation.value = true;
-  //   final form = state.form;
-
-  //   final newInvoiceFiles = List<File>.from(form.invoiceFiles ?? []);
-
-  //   if (invoiceFiles != null && invoiceFiles.isNotEmpty) {
-  //     newInvoiceFiles.addAll(invoiceFiles);
-  //   }
-
-  //   final newForm = form.copyWith(
-  //     plantCode: plantCode ?? form.plantCode,
-  //     invoiceNo: invoiceNo ?? form.invoiceNo,
-  //     sapNo: sapNo ?? form.sapNo,
-  //     invoiceDate: invoiceDate ?? form.invoiceDate,
-  //     invoiceFiles: newInvoiceFiles,
-  //   );
-
-  //   emitSafeState(state.copyWith(form: newForm));
-  // }
-
   void initDetails(Object? entry) {
     shouldAskForConfirmation.value = false;
-
-
     if (entry == null) {
       emitSafeState(CreateGateEntryState.initial());
       return;
     }
-
     if (entry is PodUploadForm) {
       final updatedForm = state.form.copyWith(
         plantCode: entry.plantCode,
@@ -113,8 +72,6 @@ class CreateGateEntryCubit extends AppBaseCubit<CreateGateEntryState> {
         remarks: entry.remarks,
         invoiceFiles: entry.invoiceFiles,
       );
-
-
       final nextView = (entry.docStatus ?? 0) == 0
           ? GateEntryView.edit
           : GateEntryView.completed;
@@ -187,52 +144,30 @@ class CreateGateEntryCubit extends AppBaseCubit<CreateGateEntryState> {
 
 Option<Pair<String, int?>> _validate() {
   final form = state.form;
-
-
   if (form.invoiceFiles == null || form.invoiceFiles!.isEmpty) {
     return const Some(Pair('Please upload at least one document image', 0));
   }
-
-
-  final isDeliveryChallan = form.deliveryChallanNo != null &&
+final isDeliveryChallan = form.deliveryChallanNo != null &&
                             form.deliveryChallanNo!.isNotEmpty;
 
   if (isDeliveryChallan) {
-
     if (form.deliveryChallanNo == null || form.deliveryChallanNo!.isEmpty) {
       return const Some(Pair('Delivery Challan No is required', 6));
-    }
-
-    if (form.invoiceDate == null || form.invoiceDate!.isEmpty) {
+    }if (form.invoiceDate == null || form.invoiceDate!.isEmpty) {
       return const Some(Pair('Invoice Date is required', 8));
-    }
-
-    if (form.plantCode == null || form.plantCode!.isEmpty) {
+    }if (form.plantCode == null || form.plantCode!.isEmpty) {
       return const Some(Pair('Plant Code is required', 6));
     }
-
-
     return const None();
-  }
-
- 
-  if (form.invoiceNo == null || form.invoiceNo!.isEmpty) {
+  }if (form.invoiceNo == null || form.invoiceNo!.isEmpty) {
     return const Some(Pair('Invoice No is required', 7));
-  }
-
-  if (form.invoiceDate == null || form.invoiceDate!.isEmpty) {
+  }if (form.invoiceDate == null || form.invoiceDate!.isEmpty) {
     return const Some(Pair('Invoice Date is required', 8));
-  }
-
-  if (form.sapNo == null || form.sapNo!.isEmpty) {
+  }if (form.sapNo == null || form.sapNo!.isEmpty) {
     return const Some(Pair('SAP No is required', 8));
-  }
-
-  if (form.plantCode == null || form.plantCode!.isEmpty) {
+  }if (form.plantCode == null || form.plantCode!.isEmpty) {
     return const Some(Pair('Plant Code is required', 6));
   }
-
-  // All Invoice validations pass
   return const None();
 }
 
