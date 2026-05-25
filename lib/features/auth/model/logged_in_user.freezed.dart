@@ -40,8 +40,9 @@ mixin _$LoggedInUser {
   String? get gender => throw _privateConstructorUsedError;
   @JsonKey(name: 'birth_date')
   String? get bithDate => throw _privateConstructorUsedError;
-  String? get phone => throw _privateConstructorUsedError;
+  @JsonKey(name: 'location')
   String? get location => throw _privateConstructorUsedError;
+  String? get phone => throw _privateConstructorUsedError;
   @JsonKey(name: 'role_profile', defaultValue: [])
   List<String>? get roleProfile => throw _privateConstructorUsedError;
   String? get bio => throw _privateConstructorUsedError;
@@ -77,8 +78,8 @@ abstract class $LoggedInUserCopyWith<$Res> {
       String? roleProfileName,
       @JsonKey(name: 'gender') String? gender,
       @JsonKey(name: 'birth_date') String? bithDate,
+      @JsonKey(name: 'location') String? location,
       String? phone,
-      String? location,
       @JsonKey(name: 'role_profile', defaultValue: [])
       List<String>? roleProfile,
       String? bio,
@@ -111,8 +112,8 @@ class _$LoggedInUserCopyWithImpl<$Res, $Val extends LoggedInUser>
     Object? roleProfileName = freezed,
     Object? gender = freezed,
     Object? bithDate = freezed,
-    Object? phone = freezed,
     Object? location = freezed,
+    Object? phone = freezed,
     Object? roleProfile = freezed,
     Object? bio = freezed,
     Object? mobileNo = freezed,
@@ -162,13 +163,13 @@ class _$LoggedInUserCopyWithImpl<$Res, $Val extends LoggedInUser>
           ? _value.bithDate
           : bithDate // ignore: cast_nullable_to_non_nullable
               as String?,
-      phone: freezed == phone
-          ? _value.phone
-          : phone // ignore: cast_nullable_to_non_nullable
-              as String?,
       location: freezed == location
           ? _value.location
           : location // ignore: cast_nullable_to_non_nullable
+              as String?,
+      phone: freezed == phone
+          ? _value.phone
+          : phone // ignore: cast_nullable_to_non_nullable
               as String?,
       roleProfile: freezed == roleProfile
           ? _value.roleProfile
@@ -207,8 +208,8 @@ abstract class _$$LoggedInUserImplCopyWith<$Res>
       String? roleProfileName,
       @JsonKey(name: 'gender') String? gender,
       @JsonKey(name: 'birth_date') String? bithDate,
+      @JsonKey(name: 'location') String? location,
       String? phone,
-      String? location,
       @JsonKey(name: 'role_profile', defaultValue: [])
       List<String>? roleProfile,
       String? bio,
@@ -239,8 +240,8 @@ class __$$LoggedInUserImplCopyWithImpl<$Res>
     Object? roleProfileName = freezed,
     Object? gender = freezed,
     Object? bithDate = freezed,
-    Object? phone = freezed,
     Object? location = freezed,
+    Object? phone = freezed,
     Object? roleProfile = freezed,
     Object? bio = freezed,
     Object? mobileNo = freezed,
@@ -290,13 +291,13 @@ class __$$LoggedInUserImplCopyWithImpl<$Res>
           ? _value.bithDate
           : bithDate // ignore: cast_nullable_to_non_nullable
               as String?,
-      phone: freezed == phone
-          ? _value.phone
-          : phone // ignore: cast_nullable_to_non_nullable
-              as String?,
       location: freezed == location
           ? _value.location
           : location // ignore: cast_nullable_to_non_nullable
+              as String?,
+      phone: freezed == phone
+          ? _value.phone
+          : phone // ignore: cast_nullable_to_non_nullable
               as String?,
       roleProfile: freezed == roleProfile
           ? _value._roleProfile
@@ -330,8 +331,8 @@ class _$LoggedInUserImpl extends _LoggedInUser {
       this.roleProfileName,
       @JsonKey(name: 'gender') this.gender,
       @JsonKey(name: 'birth_date') this.bithDate,
+      @JsonKey(name: 'location') this.location,
       this.phone,
-      this.location,
       @JsonKey(name: 'role_profile', defaultValue: [])
       final List<String>? roleProfile,
       this.bio,
@@ -374,9 +375,10 @@ class _$LoggedInUserImpl extends _LoggedInUser {
   @JsonKey(name: 'birth_date')
   final String? bithDate;
   @override
-  final String? phone;
-  @override
+  @JsonKey(name: 'location')
   final String? location;
+  @override
+  final String? phone;
   final List<String>? _roleProfile;
   @override
   @JsonKey(name: 'role_profile', defaultValue: [])
@@ -396,7 +398,7 @@ class _$LoggedInUserImpl extends _LoggedInUser {
 
   @override
   String toString() {
-    return 'LoggedInUser(name: $name, username: $username, firstName: $firstName, lastName: $lastName, apiKey: $apiKey, apiSecret: $apiSecret, email: $email, password: $password, roleProfileName: $roleProfileName, gender: $gender, bithDate: $bithDate, phone: $phone, location: $location, roleProfile: $roleProfile, bio: $bio, mobileNo: $mobileNo)';
+    return 'LoggedInUser(name: $name, username: $username, firstName: $firstName, lastName: $lastName, apiKey: $apiKey, apiSecret: $apiSecret, email: $email, password: $password, roleProfileName: $roleProfileName, gender: $gender, bithDate: $bithDate, location: $location, phone: $phone, roleProfile: $roleProfile, bio: $bio, mobileNo: $mobileNo)';
   }
 
   @override
@@ -422,9 +424,9 @@ class _$LoggedInUserImpl extends _LoggedInUser {
             (identical(other.gender, gender) || other.gender == gender) &&
             (identical(other.bithDate, bithDate) ||
                 other.bithDate == bithDate) &&
-            (identical(other.phone, phone) || other.phone == phone) &&
             (identical(other.location, location) ||
                 other.location == location) &&
+            (identical(other.phone, phone) || other.phone == phone) &&
             const DeepCollectionEquality()
                 .equals(other._roleProfile, _roleProfile) &&
             (identical(other.bio, bio) || other.bio == bio) &&
@@ -447,8 +449,8 @@ class _$LoggedInUserImpl extends _LoggedInUser {
       roleProfileName,
       gender,
       bithDate,
-      phone,
       location,
+      phone,
       const DeepCollectionEquality().hash(_roleProfile),
       bio,
       mobileNo);
@@ -486,8 +488,8 @@ abstract class _LoggedInUser extends LoggedInUser {
       final String? roleProfileName,
       @JsonKey(name: 'gender') final String? gender,
       @JsonKey(name: 'birth_date') final String? bithDate,
+      @JsonKey(name: 'location') final String? location,
       final String? phone,
-      final String? location,
       @JsonKey(name: 'role_profile', defaultValue: [])
       final List<String>? roleProfile,
       final String? bio,
@@ -529,9 +531,10 @@ abstract class _LoggedInUser extends LoggedInUser {
   @JsonKey(name: 'birth_date')
   String? get bithDate;
   @override
-  String? get phone;
-  @override
+  @JsonKey(name: 'location')
   String? get location;
+  @override
+  String? get phone;
   @override
   @JsonKey(name: 'role_profile', defaultValue: [])
   List<String>? get roleProfile;

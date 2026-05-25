@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:aparna_pod/core/core.dart';
 import 'package:aparna_pod/features/gate_entry/presentation/bloc/create_gate_entry/gate_entry_cubit.dart';
+import 'package:aparna_pod/features/gate_entry/presentation/ui/widgets/document_preview.dart';
 import 'package:aparna_pod/styles/app_colors.dart';
 import 'package:aparna_pod/widgets/inputs/photo_selection_widget.dart';
 import 'package:aparna_pod/widgets/widgets.dart';
@@ -52,12 +53,11 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
   final focusNodes = List.generate(40, (index) => FocusNode());
   @override
   Widget build(BuildContext context) {
-
     final loggedInUser = context.user;
     print('loggedInUser$loggedInUser');
 
-final isSuperUser =
-    loggedInUser.roleProfile?.contains('POD Invoice Super User') ?? false;
+    final isSuperUser =
+        loggedInUser.roleProfile?.contains('POD Invoice Super User') ?? false;
     print('............$isSuperUser');
     final formState = context.watch<CreateGateEntryCubit>().state;
     final isCompleted = formState.view == GateEntryView.completed;
@@ -66,16 +66,13 @@ final isSuperUser =
     $logger.devLog('form..............$newform');
     final now = DateTime.now();
 
-final financialYearStart =
-    now.month >= 4
+    final financialYearStart = now.month >= 4
         ? DateTime(now.year, 4, 1)
         : DateTime(now.year - 1, 4, 1);
 
-final financialYearEnd =
-    now.month >= 4
+    final financialYearEnd = now.month >= 4
         ? DateTime(now.year + 1, 3, 31)
         : DateTime(now.year, 3, 31);
-        
 
     return MultiBlocListener(
       listeners: [
@@ -120,6 +117,9 @@ final financialYearEnd =
                 return PhotoSelectionWidget(
                   borderColor: AppColors.marigoldDDust,
                   fileName: 'Invoice_Photo',
+                  key: ValueKey(
+                    state.form.invoiceFiles?.isEmpty ?? true,
+                  ),
                   defaultValue: files,
                   title: 'Invoice Photos',
                   isReadOnly: !state.isNew,
@@ -237,9 +237,8 @@ final financialYearEnd =
             //   builder: (context, state) {
             //     return
             DateSelectionField(
-              
               firstDate: financialYearStart,
-              lastDate: financialYearEnd ,
+              lastDate: financialYearEnd,
               readOnly: !isSuperUser,
               // key: UniqueKey(),
               // controller: invoiceDateController,
@@ -251,12 +250,11 @@ final financialYearEnd =
                 final parsed = DateTime.tryParse(dateStr);
                 return parsed != null ? DFU.ddMMyyyy(parsed) : dateStr;
               })(),
-              
+
               onDateSelect: (p0) {
-                 final formattedDate =
-      "${p0.day.toString().padLeft(2, '0')}."
-      "${p0.month.toString().padLeft(2, '0')}."
-      "${p0.year}";
+                final formattedDate = "${p0.day.toString().padLeft(2, '0')}."
+                    "${p0.month.toString().padLeft(2, '0')}."
+                    "${p0.year}";
                 // setState(() {
                 context
                     .cubit<CreateGateEntryCubit>()
@@ -279,7 +277,7 @@ final financialYearEnd =
                 }
 
                 return InputField(
-                 readOnly: !isSuperUser,
+                  readOnly: !isSuperUser,
                   // key: UniqueKey(),
                   controller: sapNoController,
                   initialValue: form.sapNo,
@@ -322,15 +320,67 @@ final financialYearEnd =
                 if (!shouldShowButton) {
                   return const SizedBox.shrink();
                 }
-
                 return AppButton(
                     label: state.view.toName(),
                     isLoading: state.isLoading,
                     bgColor: AppColors.haintBlue,
                     margin: const EdgeInsets.all(12.0),
                     onPressed: () {
-                      context.cubit<CreateGateEntryCubit>().save();
+                      final cubit = context.cubit<CreateGateEntryCubit>();
+                      print('state.view ....:${state.view.name}');
+
+                      if (state.view == GateEntryView.create) {
+                        final files = state.form.invoiceFiles ?? [];
+
+                        if (files.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please scan a document first'),
+                            ),
+                          );
+                          return;
+                        }
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => InvoicePreviewScreen(
+                              files: state.form.invoiceFiles ?? [],
+                              onCancel: () {
+                                cubit.onValueChanged(
+                                  invoiceNo: '',
+                                  sapNo: '',
+                                  invoiceFiles: [],
+                                  invoiceDate: '',
+                                  deliveryChallanNo: '',
+                                  plantCode: '',
+                                );
+                                setState(() {
+                                  invoiceNoController.clear();
+                                  sapNoController.clear();
+                                  invoiceDateController.clear();
+                                  deliveryChallanController.clear();
+                                  plantCodeController.clear();
+                                });
+                              },
+                              onConfirm: () {
+                                context.cubit<CreateGateEntryCubit>().save();
+                              },
+                            ),
+                          ),
+                        );
+                      } else {
+                        context.cubit<CreateGateEntryCubit>().save();
+                      }
                     });
+
+                // return AppButton(
+                //     label: state.view.toName(),
+                //     isLoading: state.isLoading,
+                //     bgColor: AppColors.haintBlue,
+                //     margin: const EdgeInsets.all(12.0),
+                //     onPressed: () {
+                //       context.cubit<CreateGateEntryCubit>().save();
+                //     });
               },
             ),
 // ],
@@ -511,65 +561,65 @@ final financialYearEnd =
 
       return dates;
     }
+
     String? selectInvoiceDate(List<String> dates) {
-  if (dates.isEmpty) return null;
+      if (dates.isEmpty) return null;
 
-  final now = DateTime.now();
+      final now = DateTime.now();
 
-  // Financial year logic
-  // Example:
-  // Apr 2025 - Mar 2026
-  final fyStartYear = now.month >= 4 ? now.year : now.year - 1;
-  final fyEndYear = fyStartYear + 1;
+      // Financial year logic
+      // Example:
+      // Apr 2025 - Mar 2026
+      final fyStartYear = now.month >= 4 ? now.year : now.year - 1;
+      final fyEndYear = fyStartYear + 1;
 
-  DateTime? validDate;
+      DateTime? validDate;
 
-  for (final rawDate in dates) {
-    try {
-      // Normalize separators
-      final cleaned = rawDate.replaceAll(RegExp(r'[^0-9]'), '/');
+      for (final rawDate in dates) {
+        try {
+          // Normalize separators
+          final cleaned = rawDate.replaceAll(RegExp(r'[^0-9]'), '/');
 
-      final parts = cleaned.split('/');
+          final parts = cleaned.split('/');
 
-      if (parts.length != 3) continue;
+          if (parts.length != 3) continue;
 
-      final day = int.tryParse(parts[0]);
-      final month = int.tryParse(parts[1]);
-      final year = int.tryParse(parts[2]);
+          final day = int.tryParse(parts[0]);
+          final month = int.tryParse(parts[1]);
+          final year = int.tryParse(parts[2]);
 
-      if (day == null || month == null || year == null) continue;
+          if (day == null || month == null || year == null) continue;
 
-      // Reject impossible OCR years
-      if (year < fyStartYear || year > fyEndYear) {
-        debugPrint('❌ Rejected invalid OCR year: $year');
-        continue;
+          // Reject impossible OCR years
+          if (year < fyStartYear || year > fyEndYear) {
+            debugPrint('❌ Rejected invalid OCR year: $year');
+            continue;
+          }
+
+          // Basic validation
+          if (month < 1 || month > 12) continue;
+          if (day < 1 || day > 31) continue;
+
+          final parsed = DateTime(year, month, day);
+
+          if (parsed.isAfter(now)) {
+            debugPrint('❌ Future date rejected: $parsed');
+            continue;
+          }
+
+          validDate = parsed;
+          break;
+        } catch (_) {
+          continue;
+        }
       }
 
-      // Basic validation
-      if (month < 1 || month > 12) continue;
-      if (day < 1 || day > 31) continue;
+      if (validDate == null) return null;
 
-      final parsed = DateTime(year, month, day);
-
-      
-      if (parsed.isAfter(now)) {
-        debugPrint('❌ Future date rejected: $parsed');
-        continue;
-      }
-
-      validDate = parsed;
-      break;
-    } catch (_) {
-      continue;
+      return "${validDate.day.toString().padLeft(2, '0')}."
+          "${validDate.month.toString().padLeft(2, '0')}."
+          "${validDate.year}";
     }
-  }
-
-  if (validDate == null) return null;
-
-  return "${validDate.day.toString().padLeft(2, '0')}."
-       "${validDate.month.toString().padLeft(2, '0')}."
-       "${validDate.year}";
-}
 
     // String? selectInvoiceDate(List<String> dates) {
     //   if (dates.isEmpty) return null;
@@ -625,13 +675,12 @@ final financialYearEnd =
       return true; // success — stop processing more images
     }
 
-    final tenDigitNumbers = getAllTenDigitNumbers(fullText, excludeHighStart: true);
+    final tenDigitNumbers =
+        getAllTenDigitNumbers(fullText, excludeHighStart: true);
 
     final twelveDigitRegex = RegExp(r'\b\d{12}\b');
-    final twelveDigitNumbers = twelveDigitRegex
-        .allMatches(fullText)
-        .map((m) => m.group(0)!)
-        .toList();
+    final twelveDigitNumbers =
+        twelveDigitRegex.allMatches(fullText).map((m) => m.group(0)!).toList();
 
     debugPrint('🔢 10-digit numbers: $tenDigitNumbers');
     debugPrint('🔢 12-digit numbers: $twelveDigitNumbers');
@@ -644,7 +693,8 @@ final financialYearEnd =
       invoiceNo = twelveDigitNumbers.first;
       final trimmedInvoice = invoiceNo.substring(2);
       final sapMatchPrefix = trimmedInvoice.substring(0, 4);
-      debugPrint('🔎 Invoice: $invoiceNo | Trimmed: $trimmedInvoice | SAP prefix: $sapMatchPrefix');
+      debugPrint(
+          '🔎 Invoice: $invoiceNo | Trimmed: $trimmedInvoice | SAP prefix: $sapMatchPrefix');
       final possibleSap = tenDigitNumbers.where(
         (num) => num.startsWith(sapMatchPrefix),
       );
@@ -652,8 +702,11 @@ final financialYearEnd =
       plantCode = sapMatchPrefix;
     } else if (tenDigitNumbers.isNotEmpty) {
       invoiceNo = tenDigitNumbers.first;
-      final trimmedInvoice = invoiceNo.length > 2 ? invoiceNo.substring(2) : invoiceNo;
-      final sapMatchPrefix = trimmedInvoice.length >= 4 ? trimmedInvoice.substring(0, 4) : trimmedInvoice;
+      final trimmedInvoice =
+          invoiceNo.length > 2 ? invoiceNo.substring(2) : invoiceNo;
+      final sapMatchPrefix = trimmedInvoice.length >= 4
+          ? trimmedInvoice.substring(0, 4)
+          : trimmedInvoice;
       final possibleSap = tenDigitNumbers.where(
         (num) => num != invoiceNo && num.startsWith(sapMatchPrefix),
       );

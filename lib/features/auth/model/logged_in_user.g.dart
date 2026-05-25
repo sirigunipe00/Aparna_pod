@@ -19,8 +19,8 @@ _$LoggedInUserImpl _$$LoggedInUserImplFromJson(Map<String, dynamic> json) =>
       roleProfileName: json['role_profile_name'] as String? ?? '',
       gender: json['gender'] as String?,
       bithDate: json['birth_date'] as String?,
-      phone: json['phone'] as String?,
       location: json['location'] as String?,
+      phone: json['phone'] as String?,
       roleProfile: (json['role_profile'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
@@ -42,8 +42,8 @@ Map<String, dynamic> _$$LoggedInUserImplToJson(_$LoggedInUserImpl instance) =>
       'role_profile_name': instance.roleProfileName,
       'gender': instance.gender,
       'birth_date': instance.bithDate,
-      'phone': instance.phone,
       'location': instance.location,
+      'phone': instance.phone,
       'role_profile': instance.roleProfile,
       'bio': instance.bio,
       'mobile_no': instance.mobileNo,

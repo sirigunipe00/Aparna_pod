@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:aparna_pod/core/core.dart';
@@ -21,6 +22,21 @@ class GateEntryRepoImpl extends BaseApiRepository implements GateEntryRepo {
     int? docStatus,
     String? search,
   ) async {
+     final userLocation = user().location; 
+     log('userLocation: $userLocation');
+
+  
+final filters = [
+  if (docStatus != null)
+    ['docstatus', '=', docStatus],
+
+  if (search.containsValidValue)
+    ['name', 'Like', '%$search%'],
+
+  if (userLocation != null &&
+      userLocation.toString().trim().isNotEmpty)
+    ['plant_code', '=', userLocation],
+];
     final requestConfig = RequestConfig(
       url: Urls.getList,
       parser: (json) {
@@ -29,14 +45,10 @@ class GateEntryRepoImpl extends BaseApiRepository implements GateEntryRepo {
         final listdata = data as List<dynamic>;
         return listdata.map((e) => PodUploadForm.fromJson(e)).toList();
       },
+      
       reqParams: {
         if (!(docStatus == null)) ...{
-          'filters': [
-            ['docstatus', '=', docStatus],
-            if (search.containsValidValue) ...{
-              ['name', 'Like', '%$search%']
-            }
-          ],
+          'filters': jsonEncode(filters),
         },
         'limit_start': start,
         'limit': 20,
