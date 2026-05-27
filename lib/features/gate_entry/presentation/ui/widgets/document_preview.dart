@@ -40,7 +40,7 @@ class InvoicePreviewScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                           child: Image.file(
                             files[index],
-                            fit: BoxFit.cover,
+                            fit: BoxFit.contain,
                           ),
                         ),
                       );

@@ -42,7 +42,7 @@ class CreateGateEntryCubit extends AppBaseCubit<CreateGateEntryState> {
     final form = state.form;
     final newForm = form.copyWith(
       plantCode: plantCode ?? form.plantCode,
-      invoiceNo: invoiceNo ?? form.invoiceNo, 
+      invoiceNo: invoiceNo ?? form.invoiceNo,
       sapNo: sapNo ?? form.sapNo,
       invoiceDate: invoiceDate ?? form.invoiceDate,
       deliveryChallanNo: deliveryChallanNo ?? form.deliveryChallanNo,
@@ -142,35 +142,144 @@ class CreateGateEntryCubit extends AppBaseCubit<CreateGateEntryState> {
     );
   }
 
-Option<Pair<String, int?>> _validate() {
-  final form = state.form;
-  if (form.invoiceFiles == null || form.invoiceFiles!.isEmpty) {
-    return const Some(Pair('Please upload at least one document image', 0));
-  }
-final isDeliveryChallan = form.deliveryChallanNo != null &&
-                            form.deliveryChallanNo!.isNotEmpty;
+  Option<Pair<String, int?>> _validate() {
+    final form = state.form;
 
-  if (isDeliveryChallan) {
-    if (form.deliveryChallanNo == null || form.deliveryChallanNo!.isEmpty) {
-      return const Some(Pair('Delivery Challan No is required', 6));
-    }if (form.invoiceDate == null || form.invoiceDate!.isEmpty) {
+    if (form.invoiceFiles == null || form.invoiceFiles!.isEmpty) {
+      return const Some(Pair('Please upload at least one document image', 0));
+    }
+
+    final isDeliveryChallan =
+        form.deliveryChallanNo != null && form.deliveryChallanNo!.isNotEmpty;
+
+
+    final now = DateTime.now();
+    final fyStartYear = now.month >= 4 ? now.year : now.year - 1;
+    final fyStart = DateTime(fyStartYear, 4, 1);
+    final fyEnd = DateTime(fyStartYear + 1, 3, 31, 23, 59, 59);
+    bool isValidInvoiceDate(String? dateStr) {
+      if (dateStr == null || dateStr.isEmpty) return false;
+
+      try {
+        final cleaned = dateStr.replaceAll('.', '-').replaceAll('/', '-');
+        final parts = cleaned.split('-');
+        if (parts.length != 3) return false;
+
+        final day = int.tryParse(parts[0]);
+        final month = int.tryParse(parts[1]);
+        final year = int.tryParse(parts[2]);
+        if (day == null || month == null || year == null) return false;
+
+        final selectedDate = DateTime(
+          year,
+          month,
+          day,
+        );
+
+        final today = DateTime(
+          now.year,
+          now.month,
+          now.day,
+        );
+
+        final normalizedSelected = DateTime(
+          selectedDate.year,
+          selectedDate.month,
+          selectedDate.day,
+        );
+
+        final normalizedToday = DateTime(
+          today.year,
+          today.month,
+          today.day,
+        );
+
+        if (normalizedSelected.compareTo(normalizedToday) > 0) {
+          return false;
+        }
+
+        if (selectedDate.isAfter(today)) {
+          return false;
+        }
+
+        if (selectedDate.isBefore(fyStart)) {
+          return false;
+        }
+
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+
+    if (isDeliveryChallan) {
+      if (form.deliveryChallanNo == null || form.deliveryChallanNo!.isEmpty) {
+        return const Some(Pair('Delivery Challan No is required', 6));
+      }
+      if (form.invoiceDate == null || form.invoiceDate!.isEmpty) {
+        return const Some(Pair('Invoice Date is required', 8));
+      }
+      if (!isValidInvoiceDate(form.invoiceDate)) {
+        return Some(Pair(
+          'Invoice Date must be within the current financial year ($fyStartYear-${fyStartYear + 1})',
+          8,
+        ));
+      }
+      if (form.plantCode == null || form.plantCode!.isEmpty) {
+        return const Some(Pair('Plant Code is required', 6));
+      }
+      return const None();
+    }
+
+    if (form.invoiceNo == null || form.invoiceNo!.isEmpty) {
+      return const Some(Pair('Invoice No is required', 7));
+    }
+    if (form.invoiceDate == null || form.invoiceDate!.isEmpty) {
       return const Some(Pair('Invoice Date is required', 8));
-    }if (form.plantCode == null || form.plantCode!.isEmpty) {
+    }
+    if (!isValidInvoiceDate(form.invoiceDate)) {
+      return Some(Pair(
+        'Invoice Date must be within the current financial year ($fyStartYear-${fyStartYear + 1})',
+        8,
+      ));
+    }
+    if (form.sapNo == null || form.sapNo!.isEmpty) {
+      return const Some(Pair('SAP No is required', 8));
+    }
+    if (form.plantCode == null || form.plantCode!.isEmpty) {
       return const Some(Pair('Plant Code is required', 6));
     }
-    return const None();
-  }if (form.invoiceNo == null || form.invoiceNo!.isEmpty) {
-    return const Some(Pair('Invoice No is required', 7));
-  }if (form.invoiceDate == null || form.invoiceDate!.isEmpty) {
-    return const Some(Pair('Invoice Date is required', 8));
-  }if (form.sapNo == null || form.sapNo!.isEmpty) {
-    return const Some(Pair('SAP No is required', 8));
-  }if (form.plantCode == null || form.plantCode!.isEmpty) {
-    return const Some(Pair('Plant Code is required', 6));
-  }
-  return const None();
-}
 
+    return const None();
+  }
+// Option<Pair<String, int?>> _validate() {
+//   final form = state.form;
+//   if (form.invoiceFiles == null || form.invoiceFiles!.isEmpty) {
+//     return const Some(Pair('Please upload at least one document image', 0));
+//   }
+// final isDeliveryChallan = form.deliveryChallanNo != null &&
+//                             form.deliveryChallanNo!.isNotEmpty;
+
+//   if (isDeliveryChallan) {
+//     if (form.deliveryChallanNo == null || form.deliveryChallanNo!.isEmpty) {
+//       return const Some(Pair('Delivery Challan No is required', 6));
+//     }if (form.invoiceDate == null || form.invoiceDate!.isEmpty) {
+//       return const Some(Pair('Invoice Date is required', 8));
+//     }if (form.plantCode == null || form.plantCode!.isEmpty) {
+//       return const Some(Pair('Plant Code is required', 6));
+//     }
+//     return const None();
+//   }if (form.invoiceNo == null || form.invoiceNo!.isEmpty) {
+//     return const Some(Pair('Invoice No is required', 7));
+//   }if (form.invoiceDate == null || form.invoiceDate!.isEmpty) {
+//     return const Some(Pair('Invoice Date is required', 8));
+//   }if (form.sapNo == null || form.sapNo!.isEmpty) {
+//     return const Some(Pair('SAP No is required', 8));
+//   }if (form.plantCode == null || form.plantCode!.isEmpty) {
+//     return const Some(Pair('Plant Code is required', 6));
+//   }
+//   return const None();
+// }
 }
 
 @freezed

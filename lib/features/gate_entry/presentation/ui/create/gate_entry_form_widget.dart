@@ -238,7 +238,7 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
             //     return
             DateSelectionField(
               firstDate: financialYearStart,
-              lastDate: financialYearEnd,
+              lastDate: DateTime(2028),
               readOnly: !isSuperUser,
               // key: UniqueKey(),
               // controller: invoiceDateController,

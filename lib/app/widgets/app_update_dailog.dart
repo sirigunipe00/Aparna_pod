@@ -26,7 +26,7 @@ class AppUpdateDialog extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'New version of $appName is available in Play Store. Please update the app to continue.',
+              'New version of $appName is available in Play Store. Please Uninstall the app and reinstall it.',
               textAlign: TextAlign.center,
               style: context.textTheme.titleMedium,
             ),

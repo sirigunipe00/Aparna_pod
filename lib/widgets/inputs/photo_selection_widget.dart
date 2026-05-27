@@ -211,34 +211,79 @@ class _PhotoSelectionWidgetState extends State<PhotoSelectionWidget>
     final List<String>? pictures = await CunningDocumentScanner.getPictures(
       noOfPages: 5,
       isGalleryImportAllowed: false,
-   
     );
 
     if (pictures == null || pictures.isEmpty) return;
-    // File scannedFile = File(pictures.first);
 
-    for (String path in pictures) {
-      File scannedFile = File(path);
+    // Fix orientation for all pages in parallel
+    final fixedFiles = await Future.wait(
+      pictures.map((filePath) async {
+        final file = File(filePath);
 
-      // Fix orientation
-      try {
-        final bytes = await scannedFile.readAsBytes();
-        final decoded = img.decodeImage(bytes);
-        if (decoded != null) {
-          final fixed = img.bakeOrientation(decoded);
-          await scannedFile.writeAsBytes(img.encodeJpg(fixed, quality: 100));
-        }
-      } catch (_) {}
+        try {
+          final bytes = await file.readAsBytes();
+          final decoded = img.decodeImage(bytes);
+          if (decoded != null) {
+            final fixed = img.bakeOrientation(decoded);
+            final compressedBytes = img.encodeJpg(fixed, quality: 100);
+            await file.writeAsBytes(compressedBytes, flush: true);
+          }
+        } catch (_) {}
 
-      // Add each scanned page
-      await compute(_fixImageInBackground, path);
-      await _processSelectedFile(scannedFile);
-    }
+        // Rename file
+        final ext = path.extension(file.path);
+        final dir = file.parent.path;
+        final renamedPath = path.join(
+          dir,
+          '${widget.fileName}_${DateTime.now().millisecondsSinceEpoch}_${pictures.indexOf(filePath)}$ext',
+        );
+        return file.copy(renamedPath);
+      }),
+    );
 
+    // Add all pages at once
+    setState(() {
+      _selectedImages.addAll(fixedFiles);
+    });
+
+    widget.onFileCapture(List<File>.from(_selectedImages));
   } catch (e) {
     debugPrint('Scanner Error: $e');
   }
 }
+//   Future<void> _pickFromCamera() async {
+//   try {
+//     final List<String>? pictures = await CunningDocumentScanner.getPictures(
+//       noOfPages: 5,
+//       isGalleryImportAllowed: false,
+   
+//     );
+
+//     if (pictures == null || pictures.isEmpty) return;
+//     // File scannedFile = File(pictures.first);
+
+//     for (String path in pictures) {
+//       File scannedFile = File(path);
+
+//       // Fix orientation
+//       try {
+//         final bytes = await scannedFile.readAsBytes();
+//         final decoded = img.decodeImage(bytes);
+//         if (decoded != null) {
+//           final fixed = img.bakeOrientation(decoded);
+//           await scannedFile.writeAsBytes(img.encodeJpg(fixed, quality: 100));
+//         }
+//       } catch (_) {}
+
+//       // Add each scanned page
+//       await compute(_fixImageInBackground, path);
+//       await _processSelectedFile(scannedFile);
+//     }
+
+//   } catch (e) {
+//     debugPrint('Scanner Error: $e');
+//   }
+// }
 
 //   Future<void> _pickFromCamera() async {
 //   try {
