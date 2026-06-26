@@ -2,7 +2,7 @@ name: aparna_pod
 description: "A new Flutter project."
 publish_to: "none"
 
-version: 1.0.6+10
+version: 1.0.7+12
 
 environment:
   sdk: ^3.5.4
@@ -60,6 +60,7 @@ flutter:
   assets:
     - assets/icon/
     - assets/logo/
+    - shorebird.yaml
 
 flutter_launcher_icons: 
   android: 'ic_launcher'

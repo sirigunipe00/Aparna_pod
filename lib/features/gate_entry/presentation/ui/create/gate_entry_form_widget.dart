@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:aparna_pod/core/core.dart';
 import 'package:aparna_pod/features/gate_entry/presentation/bloc/create_gate_entry/gate_entry_cubit.dart';
 import 'package:aparna_pod/features/gate_entry/presentation/ui/widgets/document_preview.dart';
@@ -29,6 +28,7 @@ class GateEntryFormWidget extends StatefulWidget {
 
 class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
   String? lastCroppedPath;
+  bool allowDateEdit = false;
 
   final ScrollController _scrollController = ScrollController();
   final invoiceNoController = TextEditingController();
@@ -54,25 +54,19 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
   @override
   Widget build(BuildContext context) {
     final loggedInUser = context.user;
-    print('loggedInUser$loggedInUser');
 
     final isSuperUser =
         loggedInUser.roleProfile?.contains('POD Invoice Super User') ?? false;
-    print('............$isSuperUser');
+
     final formState = context.watch<CreateGateEntryCubit>().state;
     final isCompleted = formState.view == GateEntryView.completed;
     final newform = formState.form;
 
-    $logger.devLog('form..............$newform');
     final now = DateTime.now();
 
     final financialYearStart = now.month >= 4
         ? DateTime(now.year, 4, 1)
         : DateTime(now.year - 1, 4, 1);
-
-    final financialYearEnd = now.month >= 4
-        ? DateTime(now.year + 1, 3, 31)
-        : DateTime(now.year, 3, 31);
 
     return MultiBlocListener(
       listeners: [
@@ -194,7 +188,7 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
                   initialValue: form.invoiceNo,
                   title: 'Invoice No',
                   borderColor: AppColors.marigoldDDust,
-                  maxLength: 10,
+                  maxLength: 12,
                   inputType: TextInputType.number,
                   onChanged: (v) {
                     context
@@ -239,7 +233,7 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
             DateSelectionField(
               firstDate: financialYearStart,
               lastDate: DateTime(2028),
-              readOnly: !isSuperUser,
+              readOnly: !isSuperUser && !allowDateEdit,
               // key: UniqueKey(),
               // controller: invoiceDateController,
               key: ValueKey(newform.invoiceDate),
@@ -254,7 +248,7 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
               onDateSelect: (p0) {
                 final formattedDate = "${p0.day.toString().padLeft(2, '0')}."
                     "${p0.month.toString().padLeft(2, '0')}."
-                    "${p0.year}";
+                    '${p0.year}';
                 // setState(() {
                 context
                     .cubit<CreateGateEntryCubit>()
@@ -321,30 +315,73 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
                   return const SizedBox.shrink();
                 }
                 return AppButton(
-                    label: state.view.toName(),
-                    isLoading: state.isLoading,
-                    bgColor: AppColors.haintBlue,
-                    margin: const EdgeInsets.all(12.0),
-                    onPressed: () {
-                      final cubit = context.cubit<CreateGateEntryCubit>();
-                      print('state.view ....:${state.view.name}');
+                  label: state.view.toName(),
+                  isLoading: state.isLoading,
+                  bgColor: AppColors.haintBlue,
+                  margin: const EdgeInsets.all(12.0),
+                  onPressed: () async {
+                    final cubit = context.cubit<CreateGateEntryCubit>();
 
-                      if (state.view == GateEntryView.create) {
-                        final files = state.form.invoiceFiles ?? [];
+                    if (state.view == GateEntryView.create) {
+                      final files = state.form.invoiceFiles ?? [];
 
-                        if (files.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Please scan a document first'),
+                      if (files.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please scan a document first'),
+                          ),
+                        );
+                        return;
+                      }
+
+                      final extractedDate = state.form.invoiceDate;
+
+                      final proceed = await showDialog<bool>(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text('Confirm Invoice Date'),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text(
+                                  'Extracted Invoice Date:',
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  extractedDate ?? 'Date not detected',
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context, false);
+                                },
+                                child: const Text('Edit'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pop(context, true);
+                                },
+                                child: const Text('OK'),
+                              ),
+                            ],
                           );
-                          return;
-                        }
+                        },
+                      );
+
+                      if (proceed == true) {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (_) => InvoicePreviewScreen(
-                              files: state.form.invoiceFiles ?? [],
+                              files: files,
                               onCancel: () {
                                 cubit.onValueChanged(
                                   invoiceNo: '',
@@ -354,24 +391,76 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
                                   deliveryChallanNo: '',
                                   plantCode: '',
                                 );
-                                setState(() {
-                                  invoiceNoController.clear();
-                                  sapNoController.clear();
-                                  invoiceDateController.clear();
-                                  deliveryChallanController.clear();
-                                  plantCodeController.clear();
-                                });
+
+                                invoiceNoController.clear();
+                                sapNoController.clear();
+                                invoiceDateController.clear();
+                                deliveryChallanController.clear();
+                                plantCodeController.clear();
                               },
                               onConfirm: () {
-                                context.cubit<CreateGateEntryCubit>().save();
+                                cubit.save();
                               },
                             ),
                           ),
                         );
                       } else {
-                        context.cubit<CreateGateEntryCubit>().save();
+                        setState(() {
+                          allowDateEdit = true;
+                        });
                       }
-                    });
+                    } else {
+                      cubit.save();
+                    }
+                  },
+                  // onPressed: () {
+                  //   final cubit = context.cubit<CreateGateEntryCubit>();
+                  //   print('state.view ....:${state.view.name}');
+
+                  //   if (state.view == GateEntryView.create) {
+                  //     final files = state.form.invoiceFiles ?? [];
+
+                  //     if (files.isEmpty) {
+                  //       ScaffoldMessenger.of(context).showSnackBar(
+                  //         const SnackBar(
+                  //           content: Text('Please scan a document first'),
+                  //         ),
+                  //       );
+                  //       return;
+                  //     }
+                  //     Navigator.push(
+                  //       context,
+                  //       MaterialPageRoute(
+                  //         builder: (_) => InvoicePreviewScreen(
+                  //           files: state.form.invoiceFiles ?? [],
+                  //           onCancel: () {
+                  //             cubit.onValueChanged(
+                  //               invoiceNo: '',
+                  //               sapNo: '',
+                  //               invoiceFiles: [],
+                  //               invoiceDate: '',
+                  //               deliveryChallanNo: '',
+                  //               plantCode: '',
+                  //             );
+                  //             setState(() {
+                  //               invoiceNoController.clear();
+                  //               sapNoController.clear();
+                  //               invoiceDateController.clear();
+                  //               deliveryChallanController.clear();
+                  //               plantCodeController.clear();
+                  //             });
+                  //           },
+                  //           onConfirm: () {
+                  //             context.cubit<CreateGateEntryCubit>().save();
+                  //           },
+                  //         ),
+                  //       ),
+                  //     );
+                  //   } else {
+                  //     context.cubit<CreateGateEntryCubit>().save();
+                  //   }
+                  // }
+                );
 
                 // return AppButton(
                 //     label: state.view.toName(),
@@ -389,150 +478,6 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
       ),
     );
   }
-//    String extractRowWiseText(RecognizedText recognizedText) {
-//   final lines = <TextLineData>[];
-
-//   for (final block in recognizedText.blocks) {
-//     for (final line in block.lines) {
-//       final box = line.boundingBox;
-//       // if (box != null) {
-//         lines.add(TextLineData(
-//           text: line.text,
-//           top: box.top,
-//           left: box.left,
-//         ));
-//       // }
-//     }
-//   }
-
-//   lines.sort((a, b) {
-//     final yDiff = (a.top - b.top).abs();
-//     if (yDiff < 12) {
-
-//       return a.left.compareTo(b.left);
-//     }
-//     return a.top.compareTo(b.top);
-//   });
-
-//   return lines.map((e) => e.text).join('\n');
-// }
-
-  // Future<void> extractTextFromImage(String imagePath) async {
-  //   final inputImage = InputImage.fromFilePath(imagePath);
-  //   final textRecognizer = TextRecognizer();
-
-  //   final recognizedText = await textRecognizer.processImage(inputImage);
-  //   final fullText = recognizedText.text;
-
-  //   debugPrint('📝 Extracted Text:\n$fullText');
-
-  //   final docType = detectDocumentType(fullText);
-
-  //   List<String> _extractAllDates(String text) {
-
-  //     final patterns = [
-  //       r'\b\d{2}[^0-9]{1,2}\d{2}[^0-9]{1,2}\d{4}\b',
-  //       r'\b\d{2}(?:\.{1,2}|\s)\d{2}(?:\.{1,2}|\s)\d{4}\b',
-  //       r'\b\d{2}\s\d{2}\s\d{4}\b',
-  //     ];
-
-  //     final dates = <String>[];
-
-  //     for (var p in patterns) {
-  //       dates.addAll(RegExp(p).allMatches(text).map((m) => m.group(0)!));
-  //     }
-
-  //     return dates;
-  //   }
-
-  //   String? selectInvoiceDate(List<String> dates) {
-  //     if (dates.isEmpty) return null;
-
-  //     if (dates.length == 1) {
-  //       return dates.first;
-  //     }
-
-  //     return dates[1];
-  //   }
-
-  //   String? extractDeliveryChallanNo(String text) {
-  //     final regex = RegExp(
-  //       r'Delivery\s*Challan\s*Number\s*[:\-\s]*([\d]+)',
-  //       caseSensitive: false,
-  //     );
-  //     return regex.firstMatch(text)?.group(1)?.trim() ??
-  //         RegExp(r'\d{6,}').firstMatch(text)?.group(0);
-  //   }
-
-  //   List<String> getAllTenDigitNumbers(String text,
-  //       {bool excludeHighStart = false}) {
-  //     final regex = RegExp(r'\b\d{10}\b');
-  //     return regex
-  //         .allMatches(text)
-  //         .map((m) => m.group(0)!)
-  //         .where((num) => !excludeHighStart || num.startsWith(RegExp(r'[0-4]')))
-  //         .toList();
-  //   }
-
-  //   final cubit = context.cubit<CreateGateEntryCubit>();
-
-  //   final allDates = _extractAllDates(fullText);
-  //   debugPrint('📅 All Detected Dates: $allDates');
-
-  //   final extractedDate = selectInvoiceDate(allDates);
-  //   debugPrint('📌 Selected Invoice Date: $extractedDate');
-
-  //   setState(() {
-  //     if (docType == DocumentType.deliveryChallan) {
-  //       final deliveryChallan = extractDeliveryChallanNo(fullText);
-  //       final plantCode =
-  //           (deliveryChallan != null && deliveryChallan.length >= 4)
-  //               ? deliveryChallan.substring(0, 4)
-  //               : null;
-
-  //       cubit.onValueChanged(
-  //         deliveryChallanNo: deliveryChallan,
-  //         invoiceDate: extractedDate,
-  //         invoiceNo: null,
-  //         plantCode: plantCode,
-  //         sapNo: null,
-  //       );
-  //       debugPrint('✅ Delivery Challan processed');
-  //       return;
-  //     }
-  //   });
-
-  //   final tenDigitNumbers =
-  //       getAllTenDigitNumbers(fullText, excludeHighStart: true);
-
-  //   final invoiceNo = tenDigitNumbers.isNotEmpty ? tenDigitNumbers.first : null;
-
-  //   String? plantCode;
-  //   String? sapNo;
-
-  //   if (invoiceNo != null && invoiceNo.length >= 4) {
-  //     plantCode = invoiceNo.substring(0, 4);
-  //     sapNo = plantCode;
-  //   }
-
-  //   cubit.onValueChanged(
-  //     invoiceNo: invoiceNo,
-  //     sapNo: sapNo,
-  //     invoiceDate: extractedDate,
-  //     deliveryChallanNo: null,
-  //     plantCode: plantCode,
-  //   );
-
-  //   debugPrint('🧾 Invoice processed');
-  //   debugPrint('📄 Invoice No: $invoiceNo');
-  //   debugPrint('🔍 SAP No: $sapNo');
-  //   debugPrint('📅 Date: $extractedDate');
-  //   debugPrint('🏷️ Plant Code: $plantCode');
-
-  //   return;
-  // }
-
-// ... rest of the file
 
   Future<bool> extractTextFromImage(String imagePath) async {
     final inputImage = InputImage.fromFilePath(imagePath);
@@ -540,9 +485,6 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
 
     final recognizedText = await textRecognizer.processImage(inputImage);
     final fullText = recognizedText.text;
-    // final fullText = extractRowWiseText(recognizedText);
-
-    // debugPrint('📝 Extracted Text:\n$fullText');
 
     final docType = detectDocumentType(fullText);
 
@@ -567,9 +509,6 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
 
       final now = DateTime.now();
 
-      // Financial year logic
-      // Example:
-      // Apr 2025 - Mar 2026
       final fyStartYear = now.month >= 4 ? now.year : now.year - 1;
       final fyEndYear = fyStartYear + 1;
 
@@ -577,7 +516,6 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
 
       for (final rawDate in dates) {
         try {
-          // Normalize separators
           final cleaned = rawDate.replaceAll(RegExp(r'[^0-9]'), '/');
 
           final parts = cleaned.split('/');
@@ -590,13 +528,11 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
 
           if (day == null || month == null || year == null) continue;
 
-          // Reject impossible OCR years
           if (year < fyStartYear || year > fyEndYear) {
             debugPrint('❌ Rejected invalid OCR year: $year');
             continue;
           }
 
-          // Basic validation
           if (month < 1 || month > 12) continue;
           if (day < 1 || day > 31) continue;
 
@@ -618,18 +554,8 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
 
       return "${validDate.day.toString().padLeft(2, '0')}."
           "${validDate.month.toString().padLeft(2, '0')}."
-          "${validDate.year}";
+          '${validDate.year}';
     }
-
-    // String? selectInvoiceDate(List<String> dates) {
-    //   if (dates.isEmpty) return null;
-
-    //   if (dates.length == 1) {
-    //     return dates.first;
-    //   }
-
-    //   return dates[1];
-    // }
 
     String? extractDeliveryChallanNo(String text) {
       final regex = RegExp(
@@ -671,8 +597,8 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
         plantCode: plantCode,
         sapNo: null,
       );
-      debugPrint('✅ Delivery Challan processed');
-      return true; // success — stop processing more images
+      debugPrint('Delivery Challan processed');
+      return true;
     }
 
     final tenDigitNumbers =
@@ -714,7 +640,6 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
       plantCode = sapMatchPrefix;
     }
 
-    // Nothing useful extracted — try the next image
     if (invoiceNo == null && extractedDate == null) {
       debugPrint('⚠️ Nothing extracted from this image, trying next...');
       return false;
@@ -739,6 +664,6 @@ class _GateEntryFormWidgetState extends State<GateEntryFormWidget> {
     debugPrint('📅 Date: $extractedDate');
     debugPrint('🏷️ Plant Code: $plantCode');
 // await textRecognizer.close();
-    return true; // success — stop processing more images
+    return true;
   }
 }

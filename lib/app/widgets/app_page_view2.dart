@@ -18,9 +18,10 @@ enum PageMode2 {
   outWardGatePass('Outward Gate Pass'),
   inWardGatePass('Inward Gate Pass'),
   emptyVehicle('Empty Vehicle Tracking');
+  const PageMode2(this.name);
 
   final String name;
-  const PageMode2(this.name);
+  
 }
 
 class AppPageView2<T extends PageViewFiltersCubit> extends StatelessWidget {

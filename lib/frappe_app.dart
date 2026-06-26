@@ -1,17 +1,14 @@
 import 'package:aparna_pod/core/core.dart';
-
 import 'package:aparna_pod/features/auth/presentation/bloc/auth/auth_cubit.dart';
 import 'package:aparna_pod/features/auth/presentation/bloc/sign_in/sign_in_cubit.dart';
-
 import 'package:aparna_pod/features/gate_entry/presentation/bloc/bloc_provider.dart';
 import 'package:aparna_pod/features/gate_entry/presentation/bloc/gate_entry_filter_cubit.dart';
-
 import 'package:aparna_pod/styles/material_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class AparnaApp extends StatelessWidget {
-  const AparnaApp({super.key});
+class AparnaPodApp extends StatelessWidget {
+  const AparnaPodApp({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -8,9 +8,7 @@ import 'package:aparna_pod/widgets/spaced_column.dart';
 import 'package:cunning_document_scanner/cunning_document_scanner.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
-import 'package:image_cropper/image_cropper.dart';
 import 'package:path/path.dart' as path;
 
 enum DocumentType { invoice, deliveryChallan }
@@ -52,7 +50,7 @@ class PhotoSelectionWidget extends StatefulWidget {
   final FocusNode? focusNode;
   final bool? isWarning;
   final Color borderColor;
-  // final Function(File oldFile, File newFile) onReCrop;
+
   final bool autoCropOnCapture;
 
   @override
@@ -71,9 +69,7 @@ class _PhotoSelectionWidgetState extends State<PhotoSelectionWidget>
       _selectedImages = List<File>.from(widget.defaultValue!);
     }
 
-    if (widget.imageUrl.isNotNull) {
-      // keep existing view behavior
-    }
+    if (widget.imageUrl.isNotNull) {}
   }
 
   @override
@@ -96,323 +92,47 @@ class _PhotoSelectionWidgetState extends State<PhotoSelectionWidget>
     }
   }
 
-  // Future<void> _pickFromCamera() async {
-  //   final file = await captureImage(); // from your mixin
-  //   if (file == null) return;
-
-  //   await _processSelectedFile(file);
-  // }
-
-  // Future<void> _pickFromGallery() async {
-  //   final file = await selectImageFromGallery();
-  //   if (file == null) return;
-
-  //   await _processSelectedFile(file);
-  // }
-//   Future<void> _pickFromCamera() async {
-//   while (true) {
-//     final file = await captureImage();
-//     if (file == null) break; // user cancelled camera
-
-//     await _processSelectedFile(file);
-
-//     // Auto open camera again unless 3+ images or read-only
-//     if (widget.isReadOnly) break;
-//   }
-// }
-  // Future<File?> _cropImageFile(File file) async {
-  //   try {
-  //     final result = await ImageCropper().cropImage(
-  //       sourcePath: file.path,
-  //       compressFormat: ImageCompressFormat.jpg,
-  //       compressQuality: 95,
-  //       uiSettings: [
-  //         AndroidUiSettings(
-  //           toolbarTitle: 'Edit Image',
-  //           toolbarColor: Colors.black,
-  //           toolbarWidgetColor: Colors.white,
-  //           statusBarColor: Colors.black,
-  //           backgroundColor: Colors.white,
-  //           activeControlsWidgetColor: Colors.blue,
-  //           hideBottomControls: false,
-  //           lockAspectRatio: false,
-  //           showCropGrid: true,
-  //         ),
-  //         IOSUiSettings(
-  //           title: 'Edit Image',
-  //         ),
-  //       ],
-  //     );
-
-  //     if (result == null) return null;
-
-  //     return File(result.path);
-  //   } catch (_) {
-  //     return null;
-  //   }
-  // }
-
-  // Future<void> _pickFromGallery() async {
-  //   final file = await selectImageFromGallery();
-  //   if (file == null) return;
-
-  //   // offer crop UI after selection
-  //   final cropped = await _cropImageFile(file);
-  //   final toProcess = cropped ?? file;
-  //   await _processSelectedFile(toProcess);
-  // }
-
-  //  Future<void> _pickFromCamera() async {
-  //   // Lock portrait while invoking camera/crop UI
-  //   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  //   try {
-  //     while (true) {
-  //       final file = await captureImage();
-  //       if (file == null) break;
-
-  //       // normalize orientation first (optional)
-  //       try {
-  //         final bytes = await file.readAsBytes();
-  //         final decoded = img.decodeImage(bytes);
-  //         if (decoded != null) {
-  //           final fixed = img.bakeOrientation(decoded);
-  //           final out = img.encodeJpg(fixed, quality: 100);
-  //           await file.writeAsBytes(out, flush: true);
-  //         }
-  //       } catch (_) {}
-
-  //       // show cropper
-  //       final cropped = await _cropImageFile(file);
-  //       final toProcess = cropped ?? file;
-
-  //       await _processSelectedFile(toProcess);
-
-  //       if (widget.isReadOnly) break;
-  //     }
-  //   } finally {
-  //     await SystemChrome.setPreferredOrientations([å
-  //       DeviceOrientation.portraitUp,
-  //       DeviceOrientation.portraitDown,
-  //     ]);
-  //   }
-  // }
-  // Future<void> _pickFromGallery() async {
-  //   final file = await selectImageFromGallery();
-  //   if (file == null) return;
-
-  //   // ✂️ open crop right after choosing from gallery
-  //   final cropped = await _cropImageFile(file);
-  //   final toUse = cropped ?? file;
-
-  //   await _processSelectedFile(toUse);
-  // }
   Future<void> _pickFromCamera() async {
-  try {
-    final List<String>? pictures = await CunningDocumentScanner.getPictures(
-      noOfPages: 5,
-      isGalleryImportAllowed: false,
-    );
-
-    if (pictures == null || pictures.isEmpty) return;
-
-    // Fix orientation for all pages in parallel
-    final fixedFiles = await Future.wait(
-      pictures.map((filePath) async {
-        final file = File(filePath);
-
-        try {
-          final bytes = await file.readAsBytes();
-          final decoded = img.decodeImage(bytes);
-          if (decoded != null) {
-            final fixed = img.bakeOrientation(decoded);
-            final compressedBytes = img.encodeJpg(fixed, quality: 100);
-            await file.writeAsBytes(compressedBytes, flush: true);
-          }
-        } catch (_) {}
-
-        // Rename file
-        final ext = path.extension(file.path);
-        final dir = file.parent.path;
-        final renamedPath = path.join(
-          dir,
-          '${widget.fileName}_${DateTime.now().millisecondsSinceEpoch}_${pictures.indexOf(filePath)}$ext',
-        );
-        return file.copy(renamedPath);
-      }),
-    );
-
-    // Add all pages at once
-    setState(() {
-      _selectedImages.addAll(fixedFiles);
-    });
-
-    widget.onFileCapture(List<File>.from(_selectedImages));
-  } catch (e) {
-    debugPrint('Scanner Error: $e');
-  }
-}
-//   Future<void> _pickFromCamera() async {
-//   try {
-//     final List<String>? pictures = await CunningDocumentScanner.getPictures(
-//       noOfPages: 5,
-//       isGalleryImportAllowed: false,
-   
-//     );
-
-//     if (pictures == null || pictures.isEmpty) return;
-//     // File scannedFile = File(pictures.first);
-
-//     for (String path in pictures) {
-//       File scannedFile = File(path);
-
-//       // Fix orientation
-//       try {
-//         final bytes = await scannedFile.readAsBytes();
-//         final decoded = img.decodeImage(bytes);
-//         if (decoded != null) {
-//           final fixed = img.bakeOrientation(decoded);
-//           await scannedFile.writeAsBytes(img.encodeJpg(fixed, quality: 100));
-//         }
-//       } catch (_) {}
-
-//       // Add each scanned page
-//       await compute(_fixImageInBackground, path);
-//       await _processSelectedFile(scannedFile);
-//     }
-
-//   } catch (e) {
-//     debugPrint('Scanner Error: $e');
-//   }
-// }
-
-//   Future<void> _pickFromCamera() async {
-//   try {
-
-//     final List<String>? pictures = await CunningDocumentScanner.getPictures(
-//       noOfPages: 5,              
-//       isGalleryImportAllowed: false,
-//     );
-
-//     if (pictures == null || pictures.isEmpty) return;
-
-//     File scannedFile = File(pictures.first);
-
-
-//     try {
-//       final bytes = await scannedFile.readAsBytes();
-//       final decoded = img.decodeImage(bytes);
-//       if (decoded != null) {
-//         final fixed = img.bakeOrientation(decoded);
-//         await scannedFile.writeAsBytes(img.encodeJpg(fixed, quality: 100));
-//       }
-//     } catch (_) {}
-
-
-//     await _processSelectedFile(scannedFile);
-
-//   } catch (e) {
-//     debugPrint("Scanner Error: $e");
-//   }
-// }
-
-
-  // Future<void> _pickFromCamera() async {
-  //   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-
-  //   try {
-  //     final file = await captureImage();
-  //     if (file == null) return;
-
-  //     // orientation fix
-  //     try {
-  //       final bytes = await file.readAsBytes();
-  //       final decoded = img.decodeImage(bytes);
-  //       if (decoded != null) {
-  //         final fixed = img.bakeOrientation(decoded);
-  //         await file.writeAsBytes(img.encodeJpg(fixed, quality: 100));
-  //       }
-  //     } catch (_) {}
-
-  //     final cropped = await _cropImageFile(file);
-  //     if (cropped == null) return;
-
-  //     await _processSelectedFile(cropped);
-  //   } finally {
-  //     await SystemChrome.setPreferredOrientations([
-  //       DeviceOrientation.portraitUp,
-  //       DeviceOrientation.portraitDown,
-  //     ]);
-  //   }
-  // }
-
-  // void _showImageSourcePicker() {
-  //   FocusScope.of(context).unfocus();
-
-  //   showModalBottomSheet(
-  //     context: context,
-  //     shape: const RoundedRectangleBorder(
-  //       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-  //     ),
-  //     builder: (_) {
-  //       return SafeArea(
-  //         child: Column(
-  //           mainAxisSize: MainAxisSize.min,
-  //           children: [
-  //             ListTile(
-  //               leading: const Icon(Icons.camera_alt),
-  //               title: const Text("Capture from camera"),
-  //               onTap: () {
-  //                 Navigator.pop(context);
-  //                 _pickFromCamera();
-  //               },
-  //             ),
-  //             ListTile(
-  //               leading: const Icon(Icons.photo_library),
-  //               title: const Text("Upload from gallery"),
-  //               onTap: () {
-  //                 Navigator.pop(context);
-  //                 _pickFromGallery();
-  //               },
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
-  Future<void> _processSelectedFile(File file) async {
-    final ext = path.extension(file.path);
-    final dir = file.parent.path;
-
-    // rename
-    final renamedPath = path.join(
-      dir,
-      '${widget.fileName}_${DateTime.now().millisecondsSinceEpoch}$ext',
-    );
-
-    final renamedFile = await file.copy(renamedPath);
-
-    // Auto-crop if enabled
-    File finalFile = renamedFile;
-
-    if (widget.autoCropOnCapture) {
-      final cropped = await ImageCropper().cropImage(
-        sourcePath: renamedPath,
-        compressFormat: ImageCompressFormat.jpg,
-        compressQuality: 100,
+    try {
+      final List<String>? pictures = await CunningDocumentScanner.getPictures(
+        noOfPages: 5,
+        isGalleryImportAllowed: false,
       );
 
-      if (cropped != null) {
-        finalFile = File(cropped.path);
-      }
+      if (pictures == null || pictures.isEmpty) return;
+
+      final fixedFiles = await Future.wait(
+        pictures.map((filePath) async {
+          final file = File(filePath);
+
+          try {
+            final bytes = await file.readAsBytes();
+            final decoded = img.decodeImage(bytes);
+            if (decoded != null) {
+              final fixed = img.bakeOrientation(decoded);
+              final compressedBytes = img.encodeJpg(fixed, quality: 100);
+              await file.writeAsBytes(compressedBytes, flush: true);
+            }
+          } catch (_) {}
+
+          final ext = path.extension(file.path);
+          final dir = file.parent.path;
+          final renamedPath = path.join(
+            dir,
+            '${widget.fileName}_${DateTime.now().millisecondsSinceEpoch}_${pictures.indexOf(filePath)}$ext',
+          );
+          return file.copy(renamedPath);
+        }),
+      );
+
+      setState(() {
+        _selectedImages.addAll(fixedFiles);
+      });
+
+      widget.onFileCapture(List<File>.from(_selectedImages));
+    } catch (e) {
+      debugPrint('Scanner Error: $e');
     }
-
-    setState(() {
-      _selectedImages.add(finalFile);
-    });
-
-    widget.onFileCapture(List<File>.from(_selectedImages));
   }
 
   @override
@@ -556,29 +276,9 @@ class _PhotoSelectionWidgetState extends State<PhotoSelectionWidget>
       ),
     );
   }
-
-
-}
-Future<void> _fixImageInBackground(String filePath) async {
-  final file = File(filePath);
-  final bytes = await file.readAsBytes();
-  
-  // Decode the image
-  final image = img.decodeImage(bytes);
-  if (image == null) return;
-
-  // Bake orientation (fixes sideways photos)
-  final fixedImage = img.bakeOrientation(image);
-
-  // Re-encode with 80% quality to save massive amounts of memory/disk space
-  // 100% quality is usually unnecessary for OCR and causes huge memory spikes
-  final compressedBytes = img.encodeJpg(fixedImage, quality: 80);
-  
-  await file.writeAsBytes(compressedBytes, flush: true);
 }
 
 class ImagePreviewPage extends StatefulWidget {
-
   const ImagePreviewPage({
     super.key,
     required this.images,

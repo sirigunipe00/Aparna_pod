@@ -156,7 +156,7 @@ class CreateGateEntryCubit extends AppBaseCubit<CreateGateEntryState> {
     final now = DateTime.now();
     final fyStartYear = now.month >= 4 ? now.year : now.year - 1;
     final fyStart = DateTime(fyStartYear, 4, 1);
-    final fyEnd = DateTime(fyStartYear + 1, 3, 31, 23, 59, 59);
+
     bool isValidInvoiceDate(String? dateStr) {
       if (dateStr == null || dateStr.isEmpty) return false;
 

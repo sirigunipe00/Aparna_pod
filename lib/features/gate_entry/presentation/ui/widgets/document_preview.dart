@@ -3,9 +3,6 @@ import 'package:aparna_pod/widgets/buttons/app_btn.dart';
 import 'package:flutter/material.dart';
 
 class InvoicePreviewScreen extends StatelessWidget {
-  final List<File> files;
-  final VoidCallback onConfirm;
-  final VoidCallback onCancel;
 
   const InvoicePreviewScreen({
     super.key,
@@ -13,6 +10,9 @@ class InvoicePreviewScreen extends StatelessWidget {
     required this.onConfirm,
     required this.onCancel,
   });
+  final List<File> files;
+  final VoidCallback onConfirm;
+  final VoidCallback onCancel;
 
   @override
   Widget build(BuildContext context) {
